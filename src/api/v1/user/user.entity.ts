@@ -5,14 +5,14 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
   password: string;
 
   @Column()
-  user_name: string;
+  username: string;
 
   @Column()
   profile_photo: string;

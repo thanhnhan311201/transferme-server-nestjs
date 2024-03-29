@@ -4,9 +4,11 @@ export default () => ({
   baseUrlServer: process.env.BASE_URL_SERVER,
   baseUrlClient: process.env.BASE_URL_CLIENT,
   auth: {
-    tokenExpirationTime: process.env.TOKEN_EXPIRATION_TIME || '24h',
-    secretJwtKey:
-      process.env.SECRET_JWT_KEY || 'transfermeisasupperuserfultool',
+    accessTokenExpirationTime: process.env.ACCESS_TOKEN_EXPIRATION_TIME || '8h',
+    refreshTokenExpirationTime:
+      process.env.REFRESH_TOKEN_EXPIRATION_TIME || '1d',
+    secretJwtKey: process.env.SECRET_JWT_KEY || 'accessSecret',
+    secretJwtRefreshKey: process.env.SECRET_JWT_REFRESH_KEY || 'refreshSecret',
   },
   thirdParty: {
     google: {

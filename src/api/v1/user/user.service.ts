@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 
 import { ConfigService } from '@nestjs/config';
-import { CreateUser } from './types/service.type';
+import { CreateUser } from './types';
 
 @Injectable({})
 export class UserService {
@@ -18,7 +18,7 @@ export class UserService {
     const user = this.userRepo.create({
       email: data.email,
       password: data.password,
-      user_name: data.username,
+      username: data.username,
       profile_photo:
         data.profilePhoto ||
         `${this.cfgService.get<string>('baseUrlServer')}/images/user.png`,

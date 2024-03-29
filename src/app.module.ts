@@ -5,9 +5,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { join } from 'path';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UserModule } from './api/v1/user/user.module';
+import { AuthModule } from './api/v1/auth/auth.module';
 
 import { User } from './api/v1/user/user.entity';
 
@@ -33,8 +32,9 @@ import config from 'config/general.config';
       synchronize: true,
     }),
     UserModule,
+    AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
