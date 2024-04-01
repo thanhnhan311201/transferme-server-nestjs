@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import bcrypt from 'bcrypt';
+import { hashSync, compareSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from '../user/user.service';
@@ -23,13 +23,13 @@ export class AuthService {
       this.jwtService.signAsync(payload, {
         secret: this.cfgService.get<string>('secretJwtKey') || 'accessSecret',
         expiresIn:
-          this.cfgService.get<string>('accessTokenExpirationTime') || '8h',
+          this.cfgService.get<string>('accessTokenExpirationTime') || '2h',
       }),
       this.jwtService.signAsync(payload, {
         secret:
           this.cfgService.get<string>('secretJwtRefreshKey') || 'refreshSecret',
         expiresIn:
-          this.cfgService.get<string>('refreshTokenExpirationTime') || '1d',
+          this.cfgService.get<string>('refreshTokenExpirationTime') || '8h',
       }),
     ]);
 
@@ -51,7 +51,7 @@ export class AuthService {
     }
 
     // Hash the user password
-    const hash = bcrypt.hashSync(body.password, 12);
+    const hash = hashSync(body.password, 12);
 
     // Create a new user and save it
     const user = await this.userService.create({
@@ -70,7 +70,7 @@ export class AuthService {
       throw new BadRequestException('User not found.');
     }
 
-    if (!bcrypt.compareSync(body.password, user.password)) {
+    if (!compareSync(body.password, user.password)) {
       throw new BadRequestException('Invalid password.');
     }
 

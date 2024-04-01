@@ -15,7 +15,7 @@ export class CreateUserDto {
   @IsString()
   @MaxLength(30, {
     message:
-      'The user name is too long. Please enter a user name no longer than 30 characters.',
+      'The username is too long. Please enter a user name no longer than 30 characters.',
   })
   username: string;
 

@@ -4,9 +4,9 @@ export default () => ({
   baseUrlServer: process.env.BASE_URL_SERVER,
   baseUrlClient: process.env.BASE_URL_CLIENT,
   auth: {
-    accessTokenExpirationTime: process.env.ACCESS_TOKEN_EXPIRATION_TIME || '8h',
+    accessTokenExpirationTime: process.env.ACCESS_TOKEN_EXPIRATION_TIME || '2h',
     refreshTokenExpirationTime:
-      process.env.REFRESH_TOKEN_EXPIRATION_TIME || '1d',
+      process.env.REFRESH_TOKEN_EXPIRATION_TIME || '8h',
     secretJwtKey: process.env.SECRET_JWT_KEY || 'accessSecret',
     secretJwtRefreshKey: process.env.SECRET_JWT_REFRESH_KEY || 'refreshSecret',
   },

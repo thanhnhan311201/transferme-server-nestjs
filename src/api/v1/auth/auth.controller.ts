@@ -1,11 +1,22 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 
 import { AuthService } from '../auth/auth.service';
 
 import { CreateUserDto, SigninDto, UserDto } from './dtos';
-import { Serialize } from '../interceptors/serialize.interceptor';
+import { Serialize } from '../common/interceptors';
+import { GetCurrentUser } from '../common/decorators';
 
 import { ConfigService } from '@nestjs/config';
+import { Request } from 'express';
+import { JwtAuthGuard, JwtRefreshTokenGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
@@ -24,18 +35,21 @@ export class AuthController {
 
   @Post('signin')
   async signin(@Body() body: SigninDto) {
-    const user = await this.authService.signin(body);
+    const userDto = await this.authService.signin(body);
 
-    return { statusCode: 'success', data: { user } };
+    return { statusCode: 'success', data: { ...userDto } };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Body() body: any) {
-    console.log(body);
+  @HttpCode(HttpStatus.OK)
+  logout(@Req() reg: Request) {
+    console.log('reg....', reg);
   }
 
+  @UseGuards(JwtRefreshTokenGuard)
   @Post('refresh')
-  async refreshToken(@Body() body: any) {
-    console.log(body);
+  async refreshToken(@Req() reg: Request) {
+    console.log('reg....', reg);
   }
 }

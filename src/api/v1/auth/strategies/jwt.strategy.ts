@@ -22,11 +22,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: JwtPayload): Promise<any> {
     this.logger.warn(`Payload: ${JSON.stringify(payload)}`);
 
-    const user = await this.userService.findOne(payload.userId);
-    if (!user) {
-      this.logger.error('User not found');
-      throw new UnauthorizedException();
-    }
-    return user;
+    console.log(payload);
+    return payload;
+    // const user = await this.userService.findOne(payload.userId);
+    // if (!user) {
+    //   this.logger.error('User not found');
+    //   throw new UnauthorizedException();
+    // }
+    // return user;
   }
 }
