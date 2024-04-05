@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { hashSync, compareSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
@@ -6,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { CreateUserDto, SigninDto } from './dtos';
 
-import { Tokens } from './types';
+import { JwtPayload, Tokens } from './types';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../user/user.entity';
 
@@ -18,18 +22,21 @@ export class AuthService {
     private cfgService: ConfigService,
   ) {}
 
-  async genToken(payload: { userId: number; email: string }): Promise<Tokens> {
+  async genToken(userId: number, email: string): Promise<Tokens> {
+    const jwtPayload = { userId, email };
+
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: this.cfgService.get<string>('secretJwtKey') || 'accessSecret',
-        expiresIn:
-          this.cfgService.get<string>('accessTokenExpirationTime') || '2h',
+      this.jwtService.signAsync(jwtPayload, {
+        secret: this.cfgService.get<string>('auth.secretJwtKey'),
+        expiresIn: this.cfgService.get<string>(
+          'auth.accessTokenExpirationTime',
+        ),
       }),
-      this.jwtService.signAsync(payload, {
-        secret:
-          this.cfgService.get<string>('secretJwtRefreshKey') || 'refreshSecret',
-        expiresIn:
-          this.cfgService.get<string>('refreshTokenExpirationTime') || '8h',
+      this.jwtService.signAsync(jwtPayload, {
+        secret: this.cfgService.get<string>('auth.secretJwtRefreshKey'),
+        expiresIn: this.cfgService.get<string>(
+          'auth.refreshTokenExpirationTime',
+        ),
       }),
     ]);
 
@@ -37,6 +44,12 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async updateRefreshToken(userId: number, refreshToken: string) {
+    const rtHash = hashSync(refreshToken, 12);
+
+    return this.userService.update(userId, { refresh_token: rtHash });
   }
 
   async signup(body: CreateUserDto): Promise<User> {
@@ -67,22 +80,56 @@ export class AuthService {
     const [user] = await this.userService.find(body.email);
 
     if (!user) {
-      throw new BadRequestException('User not found.');
+      throw new UnauthorizedException('Invalid email or password.');
     }
 
     if (!compareSync(body.password, user.password)) {
-      throw new BadRequestException('Invalid password.');
+      throw new UnauthorizedException('Invalid email or password.');
     }
 
-    const { accessToken, refreshToken } = await this.genToken({
-      userId: user.id,
-      email: user.email,
-    });
+    const { accessToken, refreshToken } = await this.genToken(
+      user.id,
+      user.email,
+    );
+
+    await this.updateRefreshToken(user.id, refreshToken);
 
     return {
-      user,
       accessToken,
       refreshToken,
+    };
+  }
+
+  logout(userId: number) {
+    return this.userService.update(userId, { refresh_token: null });
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    let decoded: JwtPayload;
+    try {
+      decoded = await this.jwtService.verifyAsync<JwtPayload>(refreshToken, {
+        secret: this.cfgService.get<string>('auth.secretJwtRefreshKey'),
+      });
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token.');
+    }
+
+    const user = await this.userService.findOne(decoded.userId);
+    if (!user || !user.refresh_token)
+      throw new UnauthorizedException('Invalid refresh token.');
+
+    if (!compareSync(refreshToken, user.refresh_token)) {
+      throw new UnauthorizedException('Invalid refresh token.');
+    }
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+      await this.genToken(user.id, user.email);
+
+    await this.updateRefreshToken(user.id, newRefreshToken);
+
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     };
   }
 }

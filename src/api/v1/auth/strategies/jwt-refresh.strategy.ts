@@ -1,11 +1,11 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 
 import { UserService } from '../../user/user.service';
 
 import { JwtPayload } from '../types';
-import type { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -14,23 +14,26 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   private readonly logger = new Logger(JwtRefreshStrategy.name);
 
-  constructor(private userService: UserService) {
+  constructor(
+    private userService: UserService,
+    private cfgService: ConfigService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.SECRET_JWT_REFRESH_KEY || 'refreshSecret',
+      secretOrKey: cfgService.get<string>('auth.secretJwtRefreshKey'),
       passRegToCallback: true,
     });
     this.logger.warn('JwtRefreshStrategy initialized');
   }
 
-  async validate(req: Request, payload: JwtPayload): Promise<any> {
+  async validate(payload: JwtPayload): Promise<any> {
     this.logger.warn(`Payload: ${JSON.stringify(payload)}`);
 
     const user = await this.userService.findOne(payload.userId);
     if (!user) {
       this.logger.error('User not found');
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
     return user;
   }

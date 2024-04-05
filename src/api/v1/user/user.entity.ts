@@ -17,9 +17,12 @@ export class User {
   @Column()
   profile_photo: string;
 
-  @Column()
+  @Column({ default: '' })
   friend_list: string;
 
   @Column()
   create_with: string;
+
+  @Column({ default: null })
+  refresh_token: string | null;
 }
