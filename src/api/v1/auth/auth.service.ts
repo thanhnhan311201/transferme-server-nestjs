@@ -23,7 +23,7 @@ export class AuthService {
   ) {}
 
   async genToken(userId: number, email: string): Promise<Tokens> {
-    const jwtPayload = { userId, email };
+    const jwtPayload = { sub: userId, email: email };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
@@ -114,7 +114,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token.');
     }
 
-    const user = await this.userService.findOne(decoded.userId);
+    const user = await this.userService.findOne(decoded.sub);
     if (!user || !user.refresh_token)
       throw new UnauthorizedException('Invalid refresh token.');
 
