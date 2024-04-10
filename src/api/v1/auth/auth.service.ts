@@ -13,6 +13,7 @@ import { CreateUserDto, SigninDto } from './dtos';
 import { JwtPayload, Tokens } from './types';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../user/user.entity';
+import { RefreshTokenStorage } from './helpers/refresh-token-storage';
 
 @Injectable({})
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private cfgService: ConfigService,
+    private refreshTokenStorage: RefreshTokenStorage,
   ) {}
 
   async genToken(userId: number, email: string): Promise<Tokens> {
@@ -28,9 +30,10 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
         secret: this.cfgService.get<string>('auth.secretJwtKey'),
-        expiresIn: this.cfgService.get<string>(
-          'auth.accessTokenExpirationTime',
-        ),
+        // expiresIn: this.cfgService.get<string>(
+        //   'auth.accessTokenExpirationTime',
+        // ),
+        expiresIn: '15s',
       }),
       this.jwtService.signAsync(jwtPayload, {
         secret: this.cfgService.get<string>('auth.secretJwtRefreshKey'),
@@ -44,12 +47,6 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
-  }
-
-  async updateRefreshToken(userId: number, refreshToken: string) {
-    const rtHash = hashSync(refreshToken, 12);
-
-    return this.userService.update(userId, { refresh_token: rtHash });
   }
 
   async signup(body: CreateUserDto): Promise<User> {
@@ -92,7 +89,7 @@ export class AuthService {
       user.email,
     );
 
-    await this.updateRefreshToken(user.id, refreshToken);
+    await this.refreshTokenStorage.insert(user.id, refreshToken);
 
     return {
       accessToken,
@@ -101,35 +98,34 @@ export class AuthService {
   }
 
   logout(userId: number) {
-    return this.userService.update(userId, { refresh_token: null });
+    return this.refreshTokenStorage.invalidate(userId);
   }
 
   async refreshAccessToken(refreshToken: string) {
-    let decoded: JwtPayload;
     try {
-      decoded = await this.jwtService.verifyAsync<JwtPayload>(refreshToken, {
-        secret: this.cfgService.get<string>('auth.secretJwtRefreshKey'),
-      });
+      const decoded = await this.jwtService.verifyAsync<JwtPayload>(
+        refreshToken,
+        {
+          secret: this.cfgService.get<string>('auth.secretJwtRefreshKey'),
+        },
+      );
+
+      const user = await this.userService.findOne(decoded.sub);
+      if (!user) throw new UnauthorizedException('Invalid refresh token.');
+
+      await this.refreshTokenStorage.validate(decoded.sub, refreshToken);
+
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+        await this.genToken(user.id, user.email);
+
+      await this.refreshTokenStorage.insert(user.id, refreshToken);
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token.');
     }
-
-    const user = await this.userService.findOne(decoded.sub);
-    if (!user || !user.refresh_token)
-      throw new UnauthorizedException('Invalid refresh token.');
-
-    if (!compareSync(refreshToken, user.refresh_token)) {
-      throw new UnauthorizedException('Invalid refresh token.');
-    }
-
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-      await this.genToken(user.id, user.email);
-
-    await this.updateRefreshToken(user.id, newRefreshToken);
-
-    return {
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    };
   }
 }

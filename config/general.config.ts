@@ -3,6 +3,9 @@ export default () => ({
   baseUrlApi: process.env.BASE_URL_API,
   baseUrlServer: process.env.BASE_URL_SERVER,
   baseUrlClient: process.env.BASE_URL_CLIENT,
+  redisUrl: process.env.REDIS_URL,
+  redisHost: process.env.REDIS_HOST,
+  redisPort: process.env.REDIS_PORT,
   auth: {
     accessTokenExpirationTime: process.env.ACCESS_TOKEN_EXPIRATION_TIME || '2h',
     refreshTokenExpirationTime:

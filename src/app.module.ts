@@ -11,6 +11,9 @@ import { AuthModule } from './api/v1/auth/auth.module';
 import { User } from './api/v1/user/user.entity';
 
 import config from 'config/general.config';
+import { HATEOASModule } from './api/v1/HATEOASModule/HATEOAS.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './api/v1/common/guards';
 
 @Module({
   imports: [
@@ -33,8 +36,14 @@ import config from 'config/general.config';
     }),
     UserModule,
     AuthModule,
+    HATEOASModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

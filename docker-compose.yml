@@ -33,6 +33,18 @@ services:
       - postgres
     restart: unless-stopped
 
+  cache:
+    image: redis:6
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+
+  redisinsight:
+    image: redislabs/redisinsight
+    ports:
+      - "8001:8001"
+
 networks:
   postgres:
     driver: bridge

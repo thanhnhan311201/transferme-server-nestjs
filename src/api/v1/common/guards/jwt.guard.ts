@@ -36,7 +36,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
           err ||
           new UnauthorizedException({
             statusCode: 401,
-            message: 'Unauthorized',
+            message: 'token expired',
             error: info?.name || 'TokenExpiredError',
           })
         );

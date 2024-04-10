@@ -40,7 +40,7 @@ export class AuthController {
     return { statusCode: STATUS_CODE.SUCCESS, data: { ...token } };
   }
 
-  @Post('logout')
+  @Post('signout')
   @HttpCode(HttpStatus.OK)
   async logout(@CurrentUser() user: User) {
     await this.authService.logout(user.id);

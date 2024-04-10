@@ -22,7 +22,4 @@ export class User {
 
   @Column()
   create_with: string;
-
-  @Column({ default: null })
-  refresh_token: string | null;
 }
