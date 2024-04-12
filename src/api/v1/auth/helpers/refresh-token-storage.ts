@@ -13,12 +13,13 @@ export class RefreshTokenStorage
   implements OnApplicationBootstrap, OnApplicationShutdown
 {
   private redisClient: Redis;
+
   constructor(private cfgService: ConfigService) {}
 
   onApplicationBootstrap() {
     this.redisClient = new Redis({
       host: this.cfgService.get<string>('redisHost'),
-      port: parseInt(this.cfgService.get<string>('redisPort')),
+      port: this.cfgService.get<number>('redisPort'),
       family: 6,
     });
   }
@@ -28,7 +29,12 @@ export class RefreshTokenStorage
   }
 
   async insert(userId: number, token: string): Promise<void> {
-    await this.redisClient.set(this.getKey(userId), token);
+    await this.redisClient.set(
+      this.getKey(userId),
+      token,
+      'EX',
+      this.cfgService.get<number>('auth.refreshTokenExpirationTimeForRedis'),
+    );
   }
 
   async validate(userId: number, token: string): Promise<boolean> {

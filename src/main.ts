@@ -11,6 +11,7 @@ async function bootstrap() {
       origin: process.env.BASE_URL_CLIENT,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
     },
   });
   app.setGlobalPrefix('api/v1');

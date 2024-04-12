@@ -22,7 +22,7 @@ export class UserService {
       profile_photo:
         data.profilePhoto ||
         `${this.cfgService.get<string>('baseUrlServer')}/images/user.png`,
-      create_with: data.createWith || 'transferme',
+      provider: data.provider || 'transferme',
       friend_list: '',
     });
 

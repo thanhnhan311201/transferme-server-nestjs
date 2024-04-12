@@ -21,5 +21,5 @@ export class User {
   friend_list: string;
 
   @Column()
-  create_with: string;
+  provider: string;
 }

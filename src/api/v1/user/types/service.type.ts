@@ -3,5 +3,5 @@ export type CreateUser = {
   password: string;
   username: string;
   profilePhoto?: string;
-  createWith?: string;
+  provider?: string;
 };
