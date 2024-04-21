@@ -292,7 +292,7 @@ export class AuthService {
 
       // Create a new user and save it
       const newUser = await this.userService.create({
-        email: payload.email,
+        email: payload.email.split('@')[0] + '@facebook.com',
         password: hash,
         username: payload.username,
         provider: 'facebook',
