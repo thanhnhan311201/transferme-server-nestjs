@@ -22,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: cfgService.get<string>('auth.secretJwtKey'),
+      secretOrKey: cfgService.get<string>('auth.SECRET_JWT_KEY'),
     } as StrategyOptionsWithoutRequest);
     this.logger.warn('JwtStrategy initialized');
   }

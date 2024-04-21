@@ -5,3 +5,4 @@ export * from './refresh-token.dto';
 export * from './verify-email.dto';
 export * from './google-login.dto';
 export * from './github-login.dto';
+export * from './facebook-login.dto';

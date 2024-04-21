@@ -16,10 +16,10 @@ export class HATEOASController {
       status: STATUS.SUCCESS,
       data: {
         apis: {
-          user_signin: `${this.cfgService.get<string>('baseUrlApi')}/v1/auth/signin`,
-          user_signup: `${this.cfgService.get<string>('baseUrlApi')}/v1/auth/signup`,
-          user_signout: `${this.cfgService.get<string>('baseUrlApi')}/v1/auth/signout`,
-          refresh_access_token: `${this.cfgService.get<string>('baseUrlApi')}/v1/auth/refresh`,
+          user_signin: `${this.cfgService.get<string>('BASE_URL_API')}/v1/auth/signin`,
+          user_signup: `${this.cfgService.get<string>('BASE_URL_API')}/v1/auth/signup`,
+          user_signout: `${this.cfgService.get<string>('BASE_URL_API')}/v1/auth/signout`,
+          refresh_access_token: `${this.cfgService.get<string>('BASE_URL_API')}/v1/auth/refresh`,
         },
       },
     };

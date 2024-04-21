@@ -18,8 +18,8 @@ export class RefreshTokenStorage
 
   onApplicationBootstrap() {
     this.redisClient = new Redis({
-      host: this.cfgService.get<string>('redisHost'),
-      port: this.cfgService.get<number>('redisPort'),
+      host: this.cfgService.get<string>('redis.REDIS_HOST'),
+      port: this.cfgService.get<number>('redis.REDIS_PORT'),
       family: 6,
     });
   }
@@ -33,7 +33,9 @@ export class RefreshTokenStorage
       this.getKey(userId),
       token,
       'EX',
-      this.cfgService.get<number>('auth.refreshTokenExpirationTimeForRedis'),
+      this.cfgService.get<number>(
+        'redis.REFRESH_TOKEN_EXPIRATION_TIME_FOR_REDIS',
+      ),
     );
   }
 

@@ -10,11 +10,13 @@ export class GoogleAuthClient {
 
   constructor(private cfgService: ConfigService) {
     this.authClient = new OAuth2Client({
-      clientId: cfgService.get<string>('thirdParty.google.credentialClientId'),
-      clientSecret: cfgService.get<string>(
-        'thirdParty.google.credentialClientSecret',
+      clientId: cfgService.get<string>(
+        'thirdParty.google.CREDENTIAL_CLIENT_ID',
       ),
-      redirectUri: cfgService.get<string>('thirdParty.google.redirectUrl'),
+      clientSecret: cfgService.get<string>(
+        'thirdParty.google.CREDENTIAL_CLIENT_SECRET',
+      ),
+      redirectUri: cfgService.get<string>('thirdParty.google.REDIRECT_URL'),
     });
   }
 
@@ -26,7 +28,7 @@ export class GoogleAuthClient {
       const ticket = await this.authClient.verifyIdToken({
         idToken: r.tokens.id_token,
         audience: this.cfgService.get<string>(
-          'thirdParty.google.credentialClientId',
+          'thirdParty.google.CREDENTIAL_CLIENT_ID',
         ),
       });
 

@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { map, catchError, lastValueFrom } from 'rxjs';
 
 import { UserService } from '../user/user.service';
-import { CreateUserDto, SigninDto } from './dtos';
+import { CreateUserDto, FacebookLoginDto, SigninDto } from './dtos';
 
 import { JwtPayload, Tokens } from './types';
 import { ConfigService } from '@nestjs/config';
@@ -36,15 +36,15 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
-        secret: this.cfgService.get<string>('auth.secretJwtKey'),
+        secret: this.cfgService.get<string>('auth.SECRET_JWT_KEY'),
         expiresIn: this.cfgService.get<string>(
-          'auth.accessTokenExpirationTime',
+          'auth.ACCESS_TOKEN_EXPIRATION_TIME',
         ),
       }),
       this.jwtService.signAsync(jwtPayload, {
-        secret: this.cfgService.get<string>('auth.secretJwtRefreshKey'),
+        secret: this.cfgService.get<string>('auth.SECRET_JWT_REFRESH_KEY'),
         expiresIn: this.cfgService.get<string>(
-          'auth.refreshTokenExpirationTime',
+          'auth.REFRESH_TOKEN_EXPIRATION_TIME',
         ),
       }),
     ]);
@@ -55,38 +55,38 @@ export class AuthService {
     };
   }
 
-  async signup(body: CreateUserDto): Promise<User> {
-    const users = await this.userService.find(body.email);
+  async signup(payload: CreateUserDto): Promise<User> {
+    const users = await this.userService.find(payload.email);
     if (users.length) {
       throw new BadRequestException('Email already exists.');
     }
 
     // compare password and confirm password
-    if (body.password !== body.confirmPassword) {
+    if (payload.password !== payload.confirmPassword) {
       throw new BadRequestException('Confirm password has to match.');
     }
 
     // Hash the user password
-    const hash = hashSync(body.password, 12);
+    const hash = hashSync(payload.password, 12);
 
     // Create a new user and save it
     const user = await this.userService.create({
-      email: body.email,
+      email: payload.email,
       password: hash,
-      username: body.username,
+      username: payload.username,
     });
 
     return user;
   }
 
-  async signin(body: SigninDto) {
-    const [user] = await this.userService.find(body.email);
+  async signin(payload: SigninDto) {
+    const [user] = await this.userService.find(payload.email);
 
     if (!user) {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    if (!compareSync(body.password, user.password)) {
+    if (!compareSync(payload.password, user.password)) {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
@@ -112,7 +112,7 @@ export class AuthService {
       const decoded = await this.jwtService.verifyAsync<JwtPayload>(
         refreshToken,
         {
-          secret: this.cfgService.get<string>('auth.secretJwtRefreshKey'),
+          secret: this.cfgService.get<string>('auth.SECRET_JWT_REFRESH_KEY'),
         },
       );
 
@@ -189,7 +189,7 @@ export class AuthService {
     try {
       const accessTokenRequest = this.httpService
         .post(
-          `https://github.com/login/oauth/access_token?client_id=${this.cfgService.get<string>('thirdParty.github.credentialClientId')}&client_secret=${this.cfgService.get<string>('thirdParty.github.credentialClientSecret')}&code=${authCode}`,
+          `https://github.com/login/oauth/access_token?client_id=${this.cfgService.get<string>('thirdParty.github.CREDENTIAL_CLIENT_ID')}&client_secret=${this.cfgService.get<string>('thirdParty.github.CREDENTIAL_CLIENT_SECRET')}&code=${authCode}`,
           {},
           {
             headers: {
@@ -264,5 +264,46 @@ export class AuthService {
     } catch (error) {
       throw new UnauthorizedException('Invalid github code!');
     }
+  }
+
+  async facebookLogin(payload: FacebookLoginDto) {
+    let tokens: Tokens;
+
+    const users = await this.userService.find(
+      payload.email.split('@')[0] + '@facebook.com',
+    );
+    if (users.length) {
+      const updatedUser = await this.userService.update(users[0].id, {
+        email: payload.email.split('@')[0] + '@facebook.com',
+        username: payload.username,
+        profile_photo: payload.profilePhoto,
+        provider: 'facebook',
+      });
+
+      tokens = await this.genToken(updatedUser.id, updatedUser.email);
+
+      await this.refreshTokenStorage.insert(
+        updatedUser.id,
+        tokens.refreshToken,
+      );
+    } else {
+      // Hash the user password
+      const hash = hashSync(genRandomString(8), 12);
+
+      // Create a new user and save it
+      const newUser = await this.userService.create({
+        email: payload.email,
+        password: hash,
+        username: payload.username,
+        provider: 'facebook',
+        profilePhoto: payload.profilePhoto,
+      });
+
+      tokens = await this.genToken(newUser.id, newUser.email);
+
+      await this.refreshTokenStorage.insert(newUser.id, tokens.refreshToken);
+    }
+
+    return { ...tokens };
   }
 }

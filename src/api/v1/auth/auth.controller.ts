@@ -12,6 +12,7 @@ import { AuthService } from '../auth/auth.service';
 
 import {
   CreateUserDto,
+  FacebookLoginDto,
   GitHubLoginDto,
   GoogleLoginDto,
   RefreshTokenDto,
@@ -82,7 +83,7 @@ export class AuthController {
   }
 
   @Public()
-  @Post('google-login')
+  @Post('google')
   @HttpCode(HttpStatus.OK)
   async googleLogin(@Body() body: GoogleLoginDto) {
     const token = await this.authService.googleLogin(body.authCode);
@@ -95,6 +96,15 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async githubLoginCallback(@Body() body: GitHubLoginDto) {
     const token = await this.authService.githubAuthentication(body.authCode);
+
+    return { status: STATUS.SUCCESS, data: { ...token } };
+  }
+
+  @Public()
+  @Post('facebook')
+  @HttpCode(HttpStatus.OK)
+  async facebookLogin(@Body() body: FacebookLoginDto) {
+    const token = await this.authService.facebookLogin(body);
 
     return { status: STATUS.SUCCESS, data: { ...token } };
   }

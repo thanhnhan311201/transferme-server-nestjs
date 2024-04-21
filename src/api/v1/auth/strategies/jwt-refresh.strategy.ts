@@ -25,7 +25,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: cfgService.get<string>('auth.secretJwtRefreshKey'),
+      secretOrKey: cfgService.get<string>('auth.SECRET_JWT_REFRESH_KEY'),
     } as StrategyOptionsWithoutRequest);
     this.logger.warn('JwtRefreshStrategy initialized');
   }

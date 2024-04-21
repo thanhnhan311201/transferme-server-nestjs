@@ -21,7 +21,7 @@ export class UserService {
       username: data.username,
       profile_photo:
         data.profilePhoto ||
-        `${this.cfgService.get<string>('baseUrlServer')}/images/user.png`,
+        `${this.cfgService.get<string>('BASE_URL_SERVER')}/images/user.png`,
       provider: data.provider || 'transferme',
       friend_list: '',
     });
