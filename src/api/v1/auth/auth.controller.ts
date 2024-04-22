@@ -36,9 +36,9 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Serialize(UserDto)
   async signup(@Body() body: CreateUserDto) {
-    const user = await this.authService.signup(body);
+    await this.authService.signup(body);
 
-    return { status: STATUS.SUCCESS, data: { user } };
+    return { status: STATUS.SUCCESS };
   }
 
   @Public()
