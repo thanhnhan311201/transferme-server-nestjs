@@ -31,6 +31,6 @@ export const handshakeAuthMiddleware =
 
       next();
     } catch {
-      next(new Error('FORBIDDEN'));
+      throw new ForbiddenException();
     }
   };

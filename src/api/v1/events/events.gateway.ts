@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import {
   MessageBody,
   OnGatewayConnection,
@@ -11,9 +12,10 @@ import {
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
+
 import { AuthService } from '../auth/auth.service';
-import { Logger } from '@nestjs/common';
-import { SocketWithAuth } from './types';
+
+import { SocketWithAuth, SOCKET_EVENTS } from './types';
 
 @WebSocketGateway()
 export class EventsGateway
@@ -37,9 +39,10 @@ export class EventsGateway
     this.logger.debug(
       `Socket connected with userID: ${client.user.id}, and email: "${client.user.email}"`,
     );
-
     this.logger.log(`WS Client with id: ${client.id} connected!`);
     this.logger.debug(`Number of connected sockets: ${sockets.size}`);
+
+    client.join(client.roomId.toString());
   }
 
   handleDisconnect(client: SocketWithAuth): any {
@@ -47,6 +50,11 @@ export class EventsGateway
 
     this.logger.log(`Disconnected socket id: ${client.id}`);
     this.logger.debug(`Number of connected sockets: ${sockets.size}`);
+
+    client.broadcast
+      .to(client.roomId.toString())
+      .emit(SOCKET_EVENTS.USER_LOGOUT, client.user.id);
+    client.leave(client.roomId.toString());
   }
 
   @SubscribeMessage('events')
