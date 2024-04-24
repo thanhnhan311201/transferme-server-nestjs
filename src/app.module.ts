@@ -7,11 +7,12 @@ import { join } from 'path';
 
 import { UserModule } from './api/v1/user/user.module';
 import { AuthModule } from './api/v1/auth/auth.module';
+import { EventsModule } from './api/v1/events/events.module';
+import { HATEOASModule } from './api/v1/HATEOASModule/HATEOAS.module';
 
 import { User } from './api/v1/user/user.entity';
 
 import config from 'config/general.config';
-import { HATEOASModule } from './api/v1/HATEOASModule/HATEOAS.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './api/v1/common/guards';
 
@@ -37,6 +38,7 @@ import { JwtAuthGuard } from './api/v1/common/guards';
     UserModule,
     AuthModule,
     HATEOASModule,
+    EventsModule,
   ],
   controllers: [],
   providers: [

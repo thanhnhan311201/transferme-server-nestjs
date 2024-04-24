@@ -306,4 +306,19 @@ export class AuthService {
 
     return { ...tokens };
   }
+
+  async verifyAccessToken(token: string) {
+    try {
+      const decoded = await this.jwtService.verifyAsync<JwtPayload>(token, {
+        secret: this.cfgService.get<string>('auth.SECRET_JWT_KEY'),
+      });
+
+      const user = await this.userService.findOne(decoded.sub);
+      if (!user) throw new UnauthorizedException('Invalid access token.');
+
+      return user;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid access token.');
+    }
+  }
 }

@@ -25,7 +25,7 @@ import { CurrentUser, Public } from '../common/decorators';
 import { JwtRefreshTokenGuard } from '../common/guards';
 import { User } from '../user/user.entity';
 
-import { STATUS } from '../common/types/status-code.type';
+import { STATUS } from '../common/types';
 
 @Controller('auth')
 export class AuthController {

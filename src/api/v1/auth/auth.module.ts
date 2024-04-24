@@ -25,5 +25,6 @@ import { GoogleAuthClient } from './helpers/google-auth-client';
     RefreshTokenStorage,
     GoogleAuthClient,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}
