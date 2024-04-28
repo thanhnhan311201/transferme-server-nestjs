@@ -11,6 +11,7 @@ import { IS_PUBLIC_KEY } from '../decorators';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+  // eslint-disable-next-line no-unused-vars
   constructor(private reflector: Reflector) {
     super();
   }

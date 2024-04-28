@@ -9,10 +9,12 @@ import { map } from 'rxjs/operators';
 import { plainToInstance } from 'class-transformer';
 
 interface ClassConstructor {
+  // eslint-disable-next-line no-unused-vars
   new (...args: any[]): object;
 }
 
 export class SerializeInterceptor implements NestInterceptor {
+  // eslint-disable-next-line no-unused-vars
   constructor(private dto: ClassConstructor) {}
 
   intercept(

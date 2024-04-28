@@ -4,9 +4,12 @@ import { ConfigService } from '@nestjs/config';
 
 import { Public } from '../common/decorators';
 
+import IConfig, { IGeneralConfig } from 'config';
+
 @Controller()
 export class HATEOASController {
-  constructor(private cfgService: ConfigService) {}
+  // eslint-disable-next-line no-unused-vars
+  constructor(private cfgService: ConfigService<IConfig>) {}
 
   @Public()
   @Get()
@@ -16,10 +19,10 @@ export class HATEOASController {
       status: STATUS.SUCCESS,
       data: {
         apis: {
-          user_signin: `${this.cfgService.get<string>('BASE_URL_API')}/v1/auth/signin`,
-          user_signup: `${this.cfgService.get<string>('BASE_URL_API')}/v1/auth/signup`,
-          user_signout: `${this.cfgService.get<string>('BASE_URL_API')}/v1/auth/signout`,
-          refresh_access_token: `${this.cfgService.get<string>('BASE_URL_API')}/v1/auth/refresh`,
+          user_signin: `${this.cfgService.get<IGeneralConfig>('general').baseUrlApi}/v1/auth/signin`,
+          user_signup: `${this.cfgService.get<IGeneralConfig>('general').baseUrlApi}/v1/auth/signup`,
+          user_signout: `${this.cfgService.get<IGeneralConfig>('general').baseUrlApi}/v1/auth/signout`,
+          refresh_access_token: `${this.cfgService.get<IGeneralConfig>('general').baseUrlApi}/v1/auth/refresh`,
         },
       },
     };

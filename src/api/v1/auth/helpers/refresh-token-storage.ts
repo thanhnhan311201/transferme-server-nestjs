@@ -6,6 +6,8 @@ import {
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 
+import IConfig, { ICacheConfig } from 'config';
+
 export class InvalidatedRefreshTokenError extends Error {}
 
 @Injectable()
@@ -14,12 +16,15 @@ export class RefreshTokenStorage
 {
   private redisClient: Redis;
 
-  constructor(private cfgService: ConfigService) {}
+  constructor(
+    // eslint-disable-next-line no-unused-vars
+    private cfgService: ConfigService<IConfig>,
+  ) {}
 
   onApplicationBootstrap() {
     this.redisClient = new Redis({
-      host: this.cfgService.get<string>('redis.REDIS_HOST'),
-      port: this.cfgService.get<number>('redis.REDIS_PORT'),
+      host: this.cfgService.get<ICacheConfig>('redis').redisHost,
+      port: this.cfgService.get<ICacheConfig>('redis').redisPort,
       family: 6,
     });
   }
@@ -33,9 +38,7 @@ export class RefreshTokenStorage
       this.getKey(userId),
       token,
       'EX',
-      this.cfgService.get<number>(
-        'redis.REFRESH_TOKEN_EXPIRATION_TIME_FOR_REDIS',
-      ),
+      this.cfgService.get<ICacheConfig>('redis').refreshTokenTokenExpTime,
     );
   }
 

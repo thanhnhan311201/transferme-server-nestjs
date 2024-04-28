@@ -6,12 +6,15 @@ import { User } from './user.entity';
 
 import { ConfigService } from '@nestjs/config';
 import { STATUS } from '../common/types';
+import IConfig from 'config';
 
 @Controller('user')
 export class UserController {
   constructor(
+    // eslint-disable-next-line no-unused-vars
     private userService: UserService,
-    private cfgService: ConfigService,
+    // eslint-disable-next-line no-unused-vars
+    private cfgService: ConfigService<IConfig>,
   ) {}
 
   @Get('info')

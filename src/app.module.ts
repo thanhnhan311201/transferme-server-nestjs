@@ -12,7 +12,13 @@ import { HATEOASModule } from './api/v1/HATEOASModule/HATEOAS.module';
 
 import { User } from './api/v1/user/user.entity';
 
-import config from 'config/general.config';
+import {
+  dbConfig,
+  generalConfig,
+  authConfig,
+  cacheConfig,
+  thirdPartyConfig,
+} from 'config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './api/v1/common/guards';
 
@@ -20,7 +26,16 @@ import { JwtAuthGuard } from './api/v1/common/guards';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [config],
+      envFilePath: process.env.NODE_ENV === 'development' ? '.env.dev' : '.env',
+      load: [
+        generalConfig,
+        dbConfig,
+        authConfig,
+        thirdPartyConfig,
+        cacheConfig,
+      ],
+      cache: true,
+      expandVariables: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),

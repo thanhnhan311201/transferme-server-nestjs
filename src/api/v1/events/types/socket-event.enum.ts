@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export enum SOCKET_EVENTS {
   SEND_FILE = 'SEND_FILE',
   WAIT_TRANSFER_ACCEPTED = 'WAIT_TRANSFER_ACCEPTED',

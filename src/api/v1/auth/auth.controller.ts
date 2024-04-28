@@ -29,6 +29,7 @@ import { STATUS } from '../common/types';
 
 @Controller('auth')
 export class AuthController {
+  // eslint-disable-next-line no-unused-vars
   constructor(private authService: AuthService) {}
 
   @Public()

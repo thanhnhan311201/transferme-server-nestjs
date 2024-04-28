@@ -26,6 +26,7 @@ export class EventsGateway
 
   private readonly logger = new Logger(WebSocketGateway.name);
 
+  // eslint-disable-next-line no-unused-vars
   constructor(private authService: AuthService) {}
 
   // handle after init io server

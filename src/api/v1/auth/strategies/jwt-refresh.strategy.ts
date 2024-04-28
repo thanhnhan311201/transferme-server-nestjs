@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import {
   Strategy,
@@ -9,7 +10,7 @@ import {
 import { UserService } from '../../user/user.service';
 
 import { JwtPayload } from '../types';
-import { ConfigService } from '@nestjs/config';
+import IConfig, { IAuthenticationConfig } from 'config';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -19,13 +20,15 @@ export class JwtRefreshStrategy extends PassportStrategy(
   private readonly logger = new Logger(JwtRefreshStrategy.name);
 
   constructor(
+    // eslint-disable-next-line no-unused-vars
     private userService: UserService,
-    private cfgService: ConfigService,
+    private cfgService: ConfigService<IConfig>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: cfgService.get<string>('auth.SECRET_JWT_REFRESH_KEY'),
+      secretOrKey:
+        cfgService.get<IAuthenticationConfig>('auth').secretJwtRefreshKey,
     } as StrategyOptionsWithoutRequest);
     this.logger.warn('JwtRefreshStrategy initialized');
   }

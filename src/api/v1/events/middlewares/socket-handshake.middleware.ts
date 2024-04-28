@@ -10,7 +10,7 @@ export const handshakeAuthMiddleware =
   async (socket: SocketWithAuth, next) => {
     const token =
       socket.handshake.auth.token || socket.handshake.headers['token'];
-    // logger.debug(`Validating auth token before connection: ${token}`);
+    logger.debug(`Validating auth token before connection: ${token}`);
 
     if (!token) {
       throw new ForbiddenException();

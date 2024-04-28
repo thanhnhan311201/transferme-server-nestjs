@@ -1,17 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from './user.entity';
 
-import { ConfigService } from '@nestjs/config';
 import { CreateUser } from './types';
+import IConfig, { IGeneralConfig } from 'config';
 
 @Injectable({})
 export class UserService {
   constructor(
+    // eslint-disable-next-line no-unused-vars
     @InjectRepository(User) private userRepo: Repository<User>,
-    private cfgService: ConfigService,
+    // eslint-disable-next-line no-unused-vars
+    private cfgService: ConfigService<IConfig>,
   ) {}
 
   create(data: CreateUser) {
@@ -21,7 +24,7 @@ export class UserService {
       username: data.username,
       profile_photo:
         data.profilePhoto ||
-        `${this.cfgService.get<string>('BASE_URL_SERVER')}/images/user.png`,
+        `${this.cfgService.get<IGeneralConfig>('general').baseUrlServer}/images/user.png`,
       provider: data.provider || 'transferme',
       friend_list: '',
     });

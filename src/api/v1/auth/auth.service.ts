@@ -3,6 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 
 import { hashSync, compareSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
@@ -18,16 +19,22 @@ import { RefreshTokenStorage } from './helpers/refresh-token-storage';
 import { GoogleAuthClient } from './helpers/google-auth-client';
 
 import { genRandomString } from 'src/utils/helpers.util';
-import { HttpService } from '@nestjs/axios';
+import IConfig, { IAuthenticationConfig, IThirdPartyConfig } from 'config';
 
 @Injectable({})
 export class AuthService {
   constructor(
+    // eslint-disable-next-line no-unused-vars
     private userService: UserService,
+    // eslint-disable-next-line no-unused-vars
     private jwtService: JwtService,
-    private cfgService: ConfigService,
+    // eslint-disable-next-line no-unused-vars
+    private cfgService: ConfigService<IConfig>,
+    // eslint-disable-next-line no-unused-vars
     private refreshTokenStorage: RefreshTokenStorage,
+    // eslint-disable-next-line no-unused-vars
     private googleAuthClient: GoogleAuthClient,
+    // eslint-disable-next-line no-unused-vars
     private httpService: HttpService,
   ) {}
 
@@ -36,16 +43,17 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
-        secret: this.cfgService.get<string>('auth.SECRET_JWT_KEY'),
-        expiresIn: this.cfgService.get<string>(
-          'auth.ACCESS_TOKEN_EXPIRATION_TIME',
-        ),
+        secret: this.cfgService.get<IAuthenticationConfig>('auth').secretJwtKey,
+        expiresIn:
+          this.cfgService.get<IAuthenticationConfig>('auth').accessTokenExpTime,
       }),
       this.jwtService.signAsync(jwtPayload, {
-        secret: this.cfgService.get<string>('auth.SECRET_JWT_REFRESH_KEY'),
-        expiresIn: this.cfgService.get<string>(
-          'auth.REFRESH_TOKEN_EXPIRATION_TIME',
-        ),
+        secret:
+          this.cfgService.get<IAuthenticationConfig>('auth')
+            .secretJwtRefreshKey,
+        expiresIn:
+          this.cfgService.get<IAuthenticationConfig>('auth')
+            .refreshTokenExpTime,
       }),
     ]);
 
@@ -112,7 +120,8 @@ export class AuthService {
       const decoded = await this.jwtService.verifyAsync<JwtPayload>(
         refreshToken,
         {
-          secret: this.cfgService.get<string>('auth.SECRET_JWT_REFRESH_KEY'),
+          secret:
+            this.cfgService.get<IAuthenticationConfig>('auth').secretJwtKey,
         },
       );
 
@@ -189,7 +198,7 @@ export class AuthService {
     try {
       const accessTokenRequest = this.httpService
         .post(
-          `https://github.com/login/oauth/access_token?client_id=${this.cfgService.get<string>('thirdParty.github.CREDENTIAL_CLIENT_ID')}&client_secret=${this.cfgService.get<string>('thirdParty.github.CREDENTIAL_CLIENT_SECRET')}&code=${authCode}`,
+          `https://github.com/login/oauth/access_token?client_id=${this.cfgService.get<IThirdPartyConfig>('thirdParty').github.clientId}&client_secret=${this.cfgService.get<IThirdPartyConfig>('thirdParty').github.clientSecret}&code=${authCode}`,
           {},
           {
             headers: {
@@ -310,7 +319,7 @@ export class AuthService {
   async verifyAccessToken(token: string) {
     try {
       const decoded = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: this.cfgService.get<string>('auth.SECRET_JWT_KEY'),
+        secret: this.cfgService.get<IAuthenticationConfig>('auth').secretJwtKey,
       });
 
       const user = await this.userService.findOne(decoded.sub);
