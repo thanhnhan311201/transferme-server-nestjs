@@ -7,7 +7,6 @@ export type AuthPayload = {
 		email: string;
 		username: string;
 		picture: string;
-		friendList: string;
 	};
 	clientId: string;
 	roomId: number;

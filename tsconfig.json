@@ -31,5 +31,6 @@
         "src/utils/*"
       ]
     },
-  }
+  },
+  "exclude": ["node_modules", "dist"]
 }

@@ -6,15 +6,13 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { plainToInstance } from 'class-transformer';
+// import { plainToInstance } from 'class-transformer';
 
 interface ClassConstructor {
-	// eslint-disable-next-line no-unused-vars
 	new (...args: any[]): object;
 }
 
 export class SerializeInterceptor implements NestInterceptor {
-	// eslint-disable-next-line no-unused-vars
 	constructor(private dto: ClassConstructor) {}
 
 	intercept(
@@ -28,11 +26,11 @@ export class SerializeInterceptor implements NestInterceptor {
 			map((data: any) => {
 				// Run something before the response is sent our
 
-				console.log(
-					plainToInstance(this.dto, data.data.user, {
-						excludeExtraneousValues: true,
-					}),
-				);
+				// console.log(
+				// 	plainToInstance(this.dto, data.data.user, {
+				// 		excludeExtraneousValues: true,
+				// 	}),
+				// );
 				return data;
 				// return plainToInstance(this.dto, data, {
 				//   excludeExtraneousValues: true,

@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   cache:
-    image: redis:6
+    image: redis
     env_file:
       - .env
     ports:

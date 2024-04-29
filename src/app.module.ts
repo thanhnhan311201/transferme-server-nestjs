@@ -5,13 +5,17 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { join } from 'path';
 
-import { UserModule } from '@modules/user/user.module';
-import { AuthModule } from '@modules/auth/auth.module';
-import { EventsModule } from '@modules/events/events.module';
-import { HATEOASModule } from '@modules/HATEOASModule/HATEOAS.module';
+import { UserModule } from '@modules/User/user.module';
+import { AuthModule } from '@modules/Auth/auth.module';
+import { EventsModule } from '@modules/Events/events.module';
+import { HATEOASModule } from '@modules/HATEOAS/HATEOAS.module';
+import { TransferModule } from '@modules/Transfer/transfer.module';
+import { FriendshipModule } from '@modules/Friendship/friendship.module';
 
-import { User } from '@modules/user/user.entity';
-import { JwtAuthGuard } from '@modules/common/guards';
+import { User } from '@modules/User/user.entity';
+import { Friendship } from '@modules/Friendship/friendship.entity';
+import { Transfer } from '@modules/Transfer/transfer.entity';
+import { JwtAuthGuard } from '@modules/Common/guards';
 
 import {
 	dbConfig,
@@ -48,13 +52,15 @@ import { APP_GUARD } from '@nestjs/core';
 			database: process.env.POSTGRES_DB,
 			username: process.env.POSTGRES_USER,
 			password: process.env.POSTGRES_PASSWORD,
-			entities: [User],
+			entities: [User, Friendship, Transfer],
 			synchronize: true,
 		}),
 		UserModule,
 		AuthModule,
 		HATEOASModule,
 		EventsModule,
+		TransferModule,
+		FriendshipModule,
 	],
 	controllers: [],
 	providers: [

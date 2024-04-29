@@ -11,9 +11,7 @@ import IConfig, { IGeneralConfig } from 'src/config';
 @Injectable({})
 export class UserService {
 	constructor(
-		// eslint-disable-next-line no-unused-vars
 		@InjectRepository(User) private userRepo: Repository<User>,
-		// eslint-disable-next-line no-unused-vars
 		private cfgService: ConfigService<IConfig>,
 	) {}
 
@@ -26,7 +24,6 @@ export class UserService {
 				data.profilePhoto ||
 				`${this.cfgService.get<IGeneralConfig>('general').baseUrlServer}/images/user.png`,
 			provider: data.provider || 'transferme',
-			friend_list: '',
 		});
 
 		return this.userRepo.save(user);

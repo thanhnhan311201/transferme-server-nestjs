@@ -16,10 +16,7 @@ export class RefreshTokenStorage
 {
 	private redisClient: Redis;
 
-	constructor(
-		// eslint-disable-next-line no-unused-vars
-		private cfgService: ConfigService<IConfig>,
-	) {}
+	constructor(private cfgService: ConfigService<IConfig>) {}
 
 	onApplicationBootstrap() {
 		this.redisClient = new Redis({

@@ -13,7 +13,7 @@ import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
 
-import { AuthService } from '@modules/auth/auth.service';
+import { AuthService } from '@modules/Auth/auth.service';
 
 import { SocketWithAuth, SOCKET_EVENTS } from './types';
 
@@ -26,7 +26,6 @@ export class EventsGateway
 
 	private readonly logger = new Logger(WebSocketGateway.name);
 
-	// eslint-disable-next-line no-unused-vars
 	constructor(private authService: AuthService) {}
 
 	// handle after init io server

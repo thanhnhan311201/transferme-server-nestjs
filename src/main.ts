@@ -4,7 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
-import { WSIoAdapter } from '@modules/events/events.adapter';
+import { WSIoAdapter } from '@modules/Events/events.adapter';
 
 async function bootstrap() {
 	const logger = new Logger('Main (main.ts)');

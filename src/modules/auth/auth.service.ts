@@ -9,9 +9,9 @@ import { hashSync, compareSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { map, catchError, lastValueFrom } from 'rxjs';
 
-import { UserService } from '@modules/user/user.service';
+import { UserService } from '@modules/User/user.service';
 import { CreateUserDto, FacebookLoginDto, SigninDto } from './dtos';
-import { User } from '@modules/user/user.entity';
+import { User } from '@modules/User/user.entity';
 
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenStorage } from './helpers/refresh-token-storage';
@@ -24,17 +24,11 @@ import IConfig, { IAuthenticationConfig, IThirdPartyConfig } from 'src/config';
 @Injectable({})
 export class AuthService {
 	constructor(
-		// eslint-disable-next-line no-unused-vars
 		private userService: UserService,
-		// eslint-disable-next-line no-unused-vars
 		private jwtService: JwtService,
-		// eslint-disable-next-line no-unused-vars
 		private cfgService: ConfigService<IConfig>,
-		// eslint-disable-next-line no-unused-vars
 		private refreshTokenStorage: RefreshTokenStorage,
-		// eslint-disable-next-line no-unused-vars
 		private googleAuthClient: GoogleAuthClient,
-		// eslint-disable-next-line no-unused-vars
 		private httpService: HttpService,
 	) {}
 
@@ -64,6 +58,7 @@ export class AuthService {
 	}
 
 	async signup(payload: CreateUserDto): Promise<User> {
+		console.log('aloha');
 		const users = await this.userService.find(payload.email);
 		if (users.length) {
 			throw new BadRequestException('Email already exists.');

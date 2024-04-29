@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ForbiddenException, Logger } from '@nestjs/common';
 
-import { AuthService } from '@modules/auth/auth.service';
+import { AuthService } from '@modules/Auth/auth.service';
 
 import { SocketWithAuth } from '../types/auth.type';
 
@@ -24,7 +23,6 @@ export const handshakeAuthMiddleware =
 				email: user.email,
 				username: user.username,
 				picture: user.profile_photo,
-				friendList: user.friend_list,
 			};
 			socket.clientId = '';
 			socket.roomId = user.id;

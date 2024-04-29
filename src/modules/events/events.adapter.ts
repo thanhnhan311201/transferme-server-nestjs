@@ -2,8 +2,8 @@ import { ServerOptions, Server } from 'socket.io';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { INestApplicationContext, Logger } from '@nestjs/common';
 
-import { AuthService } from '@modules/auth/auth.service';
-import { AuthModule } from '@modules/auth/auth.module';
+import { AuthService } from '@modules/Auth/auth.service';
+import { AuthModule } from '@modules/Auth/auth.module';
 
 import { handshakeAuthMiddleware } from './middlewares/socket-handshake.middleware';
 

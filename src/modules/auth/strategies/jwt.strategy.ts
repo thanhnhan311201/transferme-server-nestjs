@@ -7,7 +7,7 @@ import {
 	StrategyOptionsWithoutRequest,
 } from 'passport-jwt';
 
-import { UserService } from '../../user/user.service';
+import { UserService } from '../../User/user.service';
 
 import { JwtPayload } from '../types';
 import IConfig, { IAuthenticationConfig } from 'src/config';
@@ -17,7 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 	private readonly logger = new Logger(JwtStrategy.name);
 
 	constructor(
-		// eslint-disable-next-line no-unused-vars
 		private userService: UserService,
 		private cfgService: ConfigService<IConfig>,
 	) {

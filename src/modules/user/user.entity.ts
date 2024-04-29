@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Friendship } from '@modules/Friendship/friendship.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class User {
@@ -17,8 +18,8 @@ export class User {
 	@Column()
 	profile_photo: string;
 
-	@Column({ default: '' })
-	friend_list: string;
+	@OneToMany(() => Friendship, (friendShip) => friendShip.user)
+	friendships: Friendship[];
 
 	@Column()
 	provider: string;

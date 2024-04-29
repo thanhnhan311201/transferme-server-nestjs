@@ -8,12 +8,12 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 
-import { AuthService } from '@modules/auth/auth.service';
-import { User } from '@modules/user/user.entity';
-import { Serialize } from '@modules/common/interceptors';
-import { CurrentUser, Public } from '@modules/common/decorators';
-import { JwtRefreshTokenGuard } from '@modules/common/guards';
-import { STATUS } from '@modules/common/types';
+import { AuthService } from '@modules/Auth/auth.service';
+import { User } from '@modules/User/user.entity';
+import { Serialize } from '@modules/Common/interceptors';
+import { CurrentUser, Public } from '@modules/Common/decorators';
+import { JwtRefreshTokenGuard } from '@modules/Common/guards';
+import { STATUS } from '@modules/Common/types';
 import {
 	CreateUserDto,
 	FacebookLoginDto,
@@ -27,7 +27,6 @@ import {
 
 @Controller('auth')
 export class AuthController {
-	// eslint-disable-next-line no-unused-vars
 	constructor(private authService: AuthService) {}
 
 	@Public()

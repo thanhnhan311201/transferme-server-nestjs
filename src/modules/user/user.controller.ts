@@ -1,8 +1,8 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 
 import { UserService } from './user.service';
-import { CurrentUser } from '@modules/common/decorators';
-import { STATUS } from '@modules/common/types';
+import { CurrentUser } from '@modules/Common/decorators';
+import { STATUS } from '@modules/Common/types';
 import { User } from './user.entity';
 
 import { ConfigService } from '@nestjs/config';
@@ -11,9 +11,7 @@ import IConfig from 'src/config';
 @Controller('user')
 export class UserController {
 	constructor(
-		// eslint-disable-next-line no-unused-vars
 		private userService: UserService,
-		// eslint-disable-next-line no-unused-vars
 		private cfgService: ConfigService<IConfig>,
 	) {}
 
