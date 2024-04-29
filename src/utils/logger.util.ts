@@ -1,7 +1,7 @@
 const createLogger = (namespace: string) => {
-  return (message: string) => {
-    console.log(`⚡️[${namespace.toUpperCase()}]: ${message}`);
-  };
+	return (message: string) => {
+		console.log(`⚡️[${namespace.toUpperCase()}]: ${message}`);
+	};
 };
 
 export const dbLogger = createLogger('DATABASE');
