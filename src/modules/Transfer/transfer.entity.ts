@@ -11,7 +11,7 @@ import { TRANSFER_STATUS } from './types';
 
 @Entity()
 export class Transfer {
-	@PrimaryGeneratedColumn()
+	@PrimaryGeneratedColumn('uuid')
 	id: number;
 
 	@ManyToOne(() => User)
@@ -28,6 +28,9 @@ export class Transfer {
 	@Column()
 	timestamp: Date;
 
-	@Column()
+	@Column({
+		type: 'enum',
+		enum: TRANSFER_STATUS,
+	})
 	status: TRANSFER_STATUS;
 }

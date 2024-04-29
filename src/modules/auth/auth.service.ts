@@ -58,7 +58,6 @@ export class AuthService {
 	}
 
 	async signup(payload: CreateUserDto): Promise<User> {
-		console.log('aloha');
 		const users = await this.userService.find(payload.email);
 		if (users.length) {
 			throw new BadRequestException('Email already exists.');

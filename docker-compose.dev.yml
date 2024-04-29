@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATA: /data/postgres
     volumes:
-       - postgres:/data/postgres
+       - ./data/postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
@@ -25,7 +25,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
-       - pgadmin:/var/lib/pgadmin
+       - ./data/pgadmin:/var/lib/pgadmin
 
     ports:
       - "${PGADMIN_PORT:-5050}:80"
@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   cache:
-    image: redis:6
+    image: redis
     env_file:
       - .env
     ports:
@@ -48,7 +48,3 @@ services:
 networks:
   postgres:
     driver: bridge
-
-volumes:
-    postgres:
-    pgadmin:

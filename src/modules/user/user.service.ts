@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { User } from './user.entity';
+import { User } from '@modules/User/user.entity';
 
 import { CreateUser } from './types';
 import IConfig, { IGeneralConfig } from 'src/config';

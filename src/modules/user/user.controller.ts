@@ -3,7 +3,7 @@ import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CurrentUser } from '@modules/Common/decorators';
 import { STATUS } from '@modules/Common/types';
-import { User } from './user.entity';
+import { User } from '@modules/User/user.entity';
 
 import { ConfigService } from '@nestjs/config';
 import IConfig from 'src/config';

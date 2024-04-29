@@ -8,11 +8,11 @@ import {
 
 import { User } from '@modules/User/user.entity';
 
-import { FRIENDSHIP_STATUS } from './types';
+import { FRIENDSHIP_STATUS } from '@modules/Friendship/types';
 
 @Entity()
 export class Friendship {
-	@PrimaryGeneratedColumn()
+	@PrimaryGeneratedColumn('uuid')
 	id: number;
 
 	@ManyToOne(() => User, (user) => user.friendships)
@@ -23,6 +23,10 @@ export class Friendship {
 	@JoinColumn()
 	friend: User;
 
-	@Column()
+	@Column({
+		type: 'enum',
+		enum: FRIENDSHIP_STATUS,
+		default: FRIENDSHIP_STATUS.PENDING,
+	})
 	status: FRIENDSHIP_STATUS;
 }

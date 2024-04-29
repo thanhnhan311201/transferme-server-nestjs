@@ -12,13 +12,9 @@ import { HATEOASModule } from '@modules/HATEOAS/HATEOAS.module';
 import { TransferModule } from '@modules/Transfer/transfer.module';
 import { FriendshipModule } from '@modules/Friendship/friendship.module';
 
-import { User } from '@modules/User/user.entity';
-import { Friendship } from '@modules/Friendship/friendship.entity';
-import { Transfer } from '@modules/Transfer/transfer.entity';
 import { JwtAuthGuard } from '@modules/Common/guards';
 
 import {
-	dbConfig,
 	generalConfig,
 	authConfig,
 	cacheConfig,
@@ -26,19 +22,16 @@ import {
 } from './config';
 
 import { APP_GUARD } from '@nestjs/core';
+import { User } from '@modules/User/user.entity';
+import { Friendship } from '@modules/Friendship/friendship.entity';
+import { Transfer } from '@modules/Transfer/transfer.entity';
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: process.env.NODE_ENV === 'development' ? '.env.dev' : '.env',
-			load: [
-				generalConfig,
-				dbConfig,
-				authConfig,
-				thirdPartyConfig,
-				cacheConfig,
-			],
+			load: [generalConfig, authConfig, thirdPartyConfig, cacheConfig],
 			cache: true,
 			expandVariables: true,
 		}),
@@ -53,7 +46,8 @@ import { APP_GUARD } from '@nestjs/core';
 			username: process.env.POSTGRES_USER,
 			password: process.env.POSTGRES_PASSWORD,
 			entities: [User, Friendship, Transfer],
-			synchronize: true,
+			synchronize: true, // does not allow in production, have to migrate database
+			autoLoadEntities: true,
 		}),
 		UserModule,
 		AuthModule,
