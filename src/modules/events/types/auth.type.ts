@@ -3,13 +3,13 @@ import { type Socket } from 'socket.io';
 // guard types
 export type AuthPayload = {
 	user: {
-		id: number;
+		id: string;
 		email: string;
 		username: string;
-		picture: string;
+		profilePhoto: string;
 	};
 	clientId: string;
-	roomId: number;
+	roomId: string;
 };
 
 export type SocketWithAuth = Socket & AuthPayload;

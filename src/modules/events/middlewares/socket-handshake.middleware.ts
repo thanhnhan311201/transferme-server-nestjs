@@ -22,7 +22,7 @@ export const handshakeAuthMiddleware =
 				id: user.id,
 				email: user.email,
 				username: user.username,
-				picture: user.profile_photo,
+				profilePhoto: user.profilePhoto,
 			};
 			socket.clientId = '';
 			socket.roomId = user.id;
