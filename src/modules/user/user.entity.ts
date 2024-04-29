@@ -1,10 +1,11 @@
 import { Friendship } from '@modules/Friendship/friendship.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { PROVIDER } from './types';
 
 @Entity()
 export class User {
 	@PrimaryGeneratedColumn('uuid')
-	id: number;
+	id: string;
 
 	@Column({ unique: true })
 	email: string;
@@ -21,6 +22,10 @@ export class User {
 	@OneToMany(() => Friendship, (friendShip) => friendShip.user)
 	friendships: Friendship[];
 
-	@Column()
-	provider: string;
+	@Column({
+		type: 'enum',
+		enum: PROVIDER,
+		default: PROVIDER.TRANSFERME,
+	})
+	provider: PROVIDER;
 }

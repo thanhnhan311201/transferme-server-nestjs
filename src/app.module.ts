@@ -47,7 +47,6 @@ import { Transfer } from '@modules/Transfer/transfer.entity';
 			password: process.env.POSTGRES_PASSWORD,
 			entities: [User, Friendship, Transfer],
 			synchronize: true, // does not allow in production, have to migrate database
-			autoLoadEntities: true,
 		}),
 		UserModule,
 		AuthModule,

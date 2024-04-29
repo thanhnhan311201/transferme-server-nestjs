@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+	Injectable,
+	NotFoundException,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +11,10 @@ import { User } from '@modules/User/user.entity';
 
 import { CreateUser } from './types';
 import IConfig, { IGeneralConfig } from 'src/config';
+import { UserDto } from './dtos/user.dto';
+import { plainToInstance } from 'class-transformer';
+import { compareSync } from 'bcryptjs';
+import { isEmpty } from 'class-validator';
 
 @Injectable({})
 export class UserService {
@@ -15,7 +23,7 @@ export class UserService {
 		private cfgService: ConfigService<IConfig>,
 	) {}
 
-	create(data: CreateUser) {
+	async create(data: CreateUser): Promise<UserDto> {
 		const user = this.userRepo.create({
 			email: data.email,
 			password: data.password,
@@ -23,41 +31,89 @@ export class UserService {
 			profile_photo:
 				data.profilePhoto ||
 				`${this.cfgService.get<IGeneralConfig>('general').baseUrlServer}/images/user.png`,
-			provider: data.provider || 'transferme',
+			provider: data.provider,
 		});
+		const savedUser = await this.userRepo.save(user);
 
-		return this.userRepo.save(user);
+		return plainToInstance(UserDto, savedUser, {
+			excludeExtraneousValues: true,
+		});
 	}
 
-	findOne(id: number) {
+	async findOne(id: string): Promise<UserDto> {
 		if (!id) {
 			return null;
 		}
 
-		return this.userRepo.findOneBy({ id });
+		const user = await this.userRepo.findOneBy({ id });
+
+		return plainToInstance(UserDto, user, {
+			excludeExtraneousValues: true,
+		});
 	}
 
-	find(email: string) {
-		return this.userRepo.find({ where: { email } });
+	async find(email: string): Promise<UserDto[]> {
+		const users = await this.userRepo.find({ where: { email } });
+
+		return users.map((user) =>
+			plainToInstance(UserDto, user, {
+				excludeExtraneousValues: true,
+			}),
+		);
 	}
 
-	async update(id: number, attributes: Partial<User>) {
-		const user = await this.findOne(id);
+	async update(id: string, attributes: Partial<User>): Promise<UserDto> {
+		if (!id) {
+			return null;
+		}
+
+		const user = await this.userRepo.findOneBy({ id });
 
 		if (!user) {
 			throw new NotFoundException('User not found!');
 		}
 
 		Object.assign(user, attributes);
-		return this.userRepo.save(user);
+		const savedUser = await this.userRepo.save(user);
+
+		return plainToInstance(UserDto, savedUser, {
+			excludeExtraneousValues: true,
+		});
 	}
 
-	async remove(id: number) {
-		const user = await this.findOne(id);
+	async remove(id: string): Promise<UserDto> {
+		if (!id) {
+			return null;
+		}
+
+		const user = await this.userRepo.findOneBy({ id });
 		if (!user) {
 			throw new NotFoundException('User not found!');
 		}
+		const removedUser = await this.userRepo.remove(user);
 
-		return this.userRepo.remove(user);
+		return plainToInstance(UserDto, removedUser, {
+			excludeExtraneousValues: true,
+		});
+	}
+
+	async authenticateUser(email: string, password: string): Promise<UserDto> {
+		if (!password || !email) {
+			throw new UnauthorizedException('Invalid email or password.');
+		}
+
+		const users = await this.userRepo.find({ where: { email } });
+		if (isEmpty(users)) {
+			throw new UnauthorizedException('Invalid email or password.');
+		}
+		const user = users[0];
+
+		if (!compareSync(password, user.password)) {
+			throw new UnauthorizedException('Invalid email or password.');
+		}
+
+		return plainToInstance(UserDto, user, {
+			excludeExtraneousValues: true,
+		});
 	}
 }

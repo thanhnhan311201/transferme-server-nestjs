@@ -10,7 +10,7 @@ import {
 
 import { AuthService } from '@modules/Auth/auth.service';
 import { User } from '@modules/User/user.entity';
-import { Serialize } from '@modules/Common/interceptors';
+// import { Serialize } from '@modules/Common/interceptors';
 import { CurrentUser, Public } from '@modules/Common/decorators';
 import { JwtRefreshTokenGuard } from '@modules/Common/guards';
 import { STATUS } from '@modules/Common/types';
@@ -21,7 +21,6 @@ import {
 	GoogleLoginDto,
 	RefreshTokenDto,
 	SigninDto,
-	UserDto,
 	VerifyEmailDto,
 } from './dtos';
 
@@ -32,7 +31,6 @@ export class AuthController {
 	@Public()
 	@Post('signup')
 	@HttpCode(HttpStatus.CREATED)
-	@Serialize(UserDto)
 	async signup(@Body() body: CreateUserDto) {
 		await this.authService.signup(body);
 

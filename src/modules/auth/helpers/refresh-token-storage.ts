@@ -30,7 +30,7 @@ export class RefreshTokenStorage
 		return this.redisClient.quit();
 	}
 
-	async insert(userId: number, token: string): Promise<void> {
+	async insert(userId: string, token: string): Promise<void> {
 		await this.redisClient.set(
 			this.getKey(userId),
 			token,
@@ -39,7 +39,7 @@ export class RefreshTokenStorage
 		);
 	}
 
-	async validate(userId: number, token: string): Promise<boolean> {
+	async validate(userId: string, token: string): Promise<boolean> {
 		const storedToken = await this.redisClient.get(this.getKey(userId));
 		if (!storedToken || storedToken !== token) {
 			throw new InvalidatedRefreshTokenError();
@@ -47,11 +47,11 @@ export class RefreshTokenStorage
 		return storedToken === token;
 	}
 
-	async invalidate(userId: number): Promise<void> {
+	async invalidate(userId: string): Promise<void> {
 		await this.redisClient.del(this.getKey(userId));
 	}
 
-	private getKey(userId: number): string {
+	private getKey(userId: string): string {
 		return `user-${userId}`;
 	}
 }

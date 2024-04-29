@@ -5,13 +5,12 @@ import {
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 
-import { hashSync, compareSync } from 'bcryptjs';
+import { hashSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { map, catchError, lastValueFrom } from 'rxjs';
 
 import { UserService } from '@modules/User/user.service';
-import { CreateUserDto, FacebookLoginDto, SigninDto } from './dtos';
-import { User } from '@modules/User/user.entity';
+import { CreateUserDto, FacebookLoginDto, SigninDto, UserDto } from './dtos';
 
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenStorage } from './helpers/refresh-token-storage';
@@ -20,6 +19,7 @@ import { genRandomString } from 'src/utils/helpers.util';
 
 import { JwtPayload, Tokens } from './types';
 import IConfig, { IAuthenticationConfig, IThirdPartyConfig } from 'src/config';
+import { PROVIDER } from '@modules/User/types';
 
 @Injectable({})
 export class AuthService {
@@ -32,7 +32,7 @@ export class AuthService {
 		private httpService: HttpService,
 	) {}
 
-	async genToken(userId: number, email: string): Promise<Tokens> {
+	async genToken(userId: string, email: string): Promise<Tokens> {
 		const jwtPayload = { sub: userId, email: email };
 
 		const [accessToken, refreshToken] = await Promise.all([
@@ -57,7 +57,7 @@ export class AuthService {
 		};
 	}
 
-	async signup(payload: CreateUserDto): Promise<User> {
+	async signup(payload: CreateUserDto): Promise<UserDto> {
 		const users = await this.userService.find(payload.email);
 		if (users.length) {
 			throw new BadRequestException('Email already exists.');
@@ -82,13 +82,12 @@ export class AuthService {
 	}
 
 	async signin(payload: SigninDto) {
-		const [user] = await this.userService.find(payload.email);
+		const user = await this.userService.authenticateUser(
+			payload.email,
+			payload.password,
+		);
 
 		if (!user) {
-			throw new UnauthorizedException('Invalid email or password.');
-		}
-
-		if (!compareSync(payload.password, user.password)) {
 			throw new UnauthorizedException('Invalid email or password.');
 		}
 
@@ -105,7 +104,7 @@ export class AuthService {
 		};
 	}
 
-	signout(userId: number) {
+	signout(userId: string) {
 		return this.refreshTokenStorage.invalidate(userId);
 	}
 
@@ -158,7 +157,7 @@ export class AuthService {
 				email: payload.email,
 				username: payload.name,
 				profile_photo: payload.picture,
-				provider: 'google',
+				provider: PROVIDER.GOOGLE,
 			});
 
 			tokens = await this.genToken(updatedUser.id, updatedUser.email);
@@ -176,7 +175,7 @@ export class AuthService {
 				email: payload.email,
 				password: hash,
 				username: payload.name,
-				provider: 'google',
+				provider: PROVIDER.GOOGLE,
 				profilePhoto: payload.picture,
 			});
 
@@ -236,7 +235,7 @@ export class AuthService {
 					email: `${gitUser.login}@git.com`,
 					username: gitUser.login,
 					profile_photo: gitUser.avatar_url,
-					provider: 'github',
+					provider: PROVIDER.GITHUB,
 				});
 
 				tokens = await this.genToken(updatedUser.id, updatedUser.email);
@@ -254,7 +253,7 @@ export class AuthService {
 					email: `${gitUser.login}@git.com`,
 					password: hash,
 					username: gitUser.login,
-					provider: 'github',
+					provider: PROVIDER.GITHUB,
 					profilePhoto: gitUser.avatar_url,
 				});
 
@@ -280,7 +279,7 @@ export class AuthService {
 				email: payload.email.split('@')[0] + '@facebook.com',
 				username: payload.username,
 				profile_photo: payload.profilePhoto,
-				provider: 'facebook',
+				provider: PROVIDER.FACEBOOK,
 			});
 
 			tokens = await this.genToken(updatedUser.id, updatedUser.email);
@@ -298,7 +297,7 @@ export class AuthService {
 				email: payload.email.split('@')[0] + '@facebook.com',
 				password: hash,
 				username: payload.username,
-				provider: 'facebook',
+				provider: PROVIDER.FACEBOOK,
 				profilePhoto: payload.profilePhoto,
 			});
 
