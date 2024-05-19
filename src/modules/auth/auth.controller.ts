@@ -8,12 +8,12 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 
-import { AuthService } from '@modules/Auth/auth.service';
-import { User } from '@modules/User/user.entity';
-// import { Serialize } from '@modules/Common/interceptors';
-import { CurrentUser, Public } from '@modules/Common/decorators';
-import { JwtRefreshTokenGuard } from '@modules/Common/guards';
-import { STATUS } from '@modules/Common/types';
+import { AuthService } from '@modules/auth/auth.service';
+// import { Serialize } from '@modules/common/interceptors';
+import { CurrentUser, Public } from '@modules/common/decorators';
+import { JwtRefreshTokenGuard } from '@modules/common/guards';
+import { STATUS } from '@modules/common/types';
+import { UserDto } from '@modules/user/dtos';
 import {
 	CreateUserDto,
 	FacebookLoginDto,
@@ -48,7 +48,7 @@ export class AuthController {
 
 	@Post('signout')
 	@HttpCode(HttpStatus.OK)
-	async logout(@CurrentUser() user: User) {
+	async logout(@CurrentUser() user: UserDto) {
 		await this.authService.signout(user.id);
 		return { status: STATUS.SUCCESS };
 	}

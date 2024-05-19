@@ -6,7 +6,7 @@ import {
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 
-import IConfig, { ICacheConfig } from 'src/config';
+import { IConfig, ICacheConfig } from '@configs/env';
 
 export class InvalidatedRefreshTokenError extends Error {}
 

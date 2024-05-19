@@ -7,37 +7,36 @@ import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { User } from '@modules/User/user.entity';
+import { User } from '@configs/typeorm';
 
 import { CreateUser } from './types';
-import IConfig, { IGeneralConfig } from 'src/config';
+import { IConfig, IGeneralConfig } from '@configs/env/index';
 import { UserDto } from './dtos/user.dto';
-import { plainToInstance } from 'class-transformer';
 import { compareSync } from 'bcryptjs';
 import { isEmpty } from 'class-validator';
+import { UserWithRelationDto } from './dtos/user-with-relation.dto';
 
 @Injectable({})
 export class UserService {
 	constructor(
 		@InjectRepository(User) private userRepo: Repository<User>,
 		private cfgService: ConfigService<IConfig>,
+		// private friendshipService: FriendshipService,
 	) {}
 
-	async create(data: CreateUser): Promise<UserDto> {
+	async create(payload: CreateUser): Promise<UserDto> {
 		const user = this.userRepo.create({
-			email: data.email,
-			password: data.password,
-			username: data.username,
-			profile_photo:
-				data.profilePhoto ||
+			email: payload.email,
+			password: payload.password,
+			username: payload.username,
+			profilePhoto:
+				payload.profilePhoto ||
 				`${this.cfgService.get<IGeneralConfig>('general').baseUrlServer}/images/user.png`,
-			provider: data.provider,
+			provider: payload.provider,
 		});
 		const savedUser = await this.userRepo.save(user);
 
-		return plainToInstance(UserDto, savedUser, {
-			excludeExtraneousValues: true,
-		});
+		return UserDto.mapToDto(savedUser);
 	}
 
 	async findOne(id: string): Promise<UserDto> {
@@ -47,19 +46,13 @@ export class UserService {
 
 		const user = await this.userRepo.findOneBy({ id });
 
-		return plainToInstance(UserDto, user, {
-			excludeExtraneousValues: true,
-		});
+		return UserDto.mapToDto(user);
 	}
 
 	async find(email: string): Promise<UserDto[]> {
 		const users = await this.userRepo.find({ where: { email } });
 
-		return users.map((user) =>
-			plainToInstance(UserDto, user, {
-				excludeExtraneousValues: true,
-			}),
-		);
+		return users.map((user) => UserDto.mapToDto(user));
 	}
 
 	async update(id: string, attributes: Partial<User>): Promise<UserDto> {
@@ -76,9 +69,7 @@ export class UserService {
 		Object.assign(user, attributes);
 		const savedUser = await this.userRepo.save(user);
 
-		return plainToInstance(UserDto, savedUser, {
-			excludeExtraneousValues: true,
-		});
+		return UserDto.mapToDto(savedUser);
 	}
 
 	async remove(id: string): Promise<UserDto> {
@@ -92,9 +83,7 @@ export class UserService {
 		}
 		const removedUser = await this.userRepo.remove(user);
 
-		return plainToInstance(UserDto, removedUser, {
-			excludeExtraneousValues: true,
-		});
+		return UserDto.mapToDto(removedUser);
 	}
 
 	async authenticateUser(email: string, password: string): Promise<UserDto> {
@@ -112,8 +101,27 @@ export class UserService {
 			throw new UnauthorizedException('Invalid email or password.');
 		}
 
-		return plainToInstance(UserDto, user, {
-			excludeExtraneousValues: true,
-		});
+		return UserDto.mapToDto(user);
+	}
+
+	async getUserInfoWithRelation(userId: string): Promise<UserWithRelationDto> {
+		if (!userId) {
+			return null;
+		}
+
+		const user = await this.userRepo
+			.createQueryBuilder('user')
+			.leftJoinAndSelect('user.friendships', 'friendship')
+			.leftJoinAndSelect('user.friendshipsAsFriend', 'friendshipsAsFriend')
+			.leftJoinAndSelect('user.transfersSent', 'transfersSent')
+			.leftJoinAndSelect('user.transfersReceived', 'transfersReceived')
+			.where('user.id = :userId', { userId })
+			.getOne();
+
+		if (!user) {
+			throw new NotFoundException('User not found!');
+		}
+
+		return UserWithRelationDto.mapToDto(user);
 	}
 }

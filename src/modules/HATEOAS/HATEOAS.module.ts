@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { HATEOASController } from './HATEOAS.controller';
+import { HATEOASController } from './hateoas.controller';
 
 @Module({
 	controllers: [HATEOASController],

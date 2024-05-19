@@ -9,8 +9,9 @@ import { hashSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { map, catchError, lastValueFrom } from 'rxjs';
 
-import { UserService } from '@modules/User/user.service';
-import { CreateUserDto, FacebookLoginDto, SigninDto, UserDto } from './dtos';
+import { UserService } from '@modules/user/user.service';
+import { CreateUserDto, FacebookLoginDto, SigninDto } from './dtos';
+import { UserDto } from '@modules/user/dtos';
 
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenStorage } from './helpers/refresh-token-storage';
@@ -18,8 +19,12 @@ import { GoogleAuthClient } from './helpers/google-auth-client';
 import { genRandomString } from 'src/utils/helpers.util';
 
 import { JwtPayload, Tokens } from './types';
-import IConfig, { IAuthenticationConfig, IThirdPartyConfig } from 'src/config';
-import { PROVIDER } from '@modules/User/types';
+import {
+	IConfig,
+	IAuthenticationConfig,
+	IThirdPartyConfig,
+} from '@configs/env';
+import { PROVIDER } from '@modules/user/types';
 
 @Injectable({})
 export class AuthService {
@@ -81,7 +86,7 @@ export class AuthService {
 		return user;
 	}
 
-	async signin(payload: SigninDto) {
+	async signin(payload: SigninDto): Promise<Tokens> {
 		const user = await this.userService.authenticateUser(
 			payload.email,
 			payload.password,
@@ -104,11 +109,11 @@ export class AuthService {
 		};
 	}
 
-	signout(userId: string) {
+	signout(userId: string): Promise<void> {
 		return this.refreshTokenStorage.invalidate(userId);
 	}
 
-	async refreshAccessToken(refreshToken: string) {
+	async refreshAccessToken(refreshToken: string): Promise<Tokens> {
 		try {
 			const decoded = await this.jwtService.verifyAsync<JwtPayload>(
 				refreshToken,
@@ -137,7 +142,7 @@ export class AuthService {
 		}
 	}
 
-	async verifyEmail(email: string) {
+	async verifyEmail(email: string): Promise<boolean> {
 		const users = await this.userService.find(email);
 		if (users.length) {
 			throw new BadRequestException('Email already exists.');
@@ -146,7 +151,7 @@ export class AuthService {
 		return true;
 	}
 
-	async googleLogin(authCode: string) {
+	async googleLogin(authCode: string): Promise<Tokens> {
 		const payload = await this.googleAuthClient.verifyAuthToken(authCode);
 
 		let tokens: Tokens;
@@ -156,7 +161,7 @@ export class AuthService {
 			const updatedUser = await this.userService.update(users[0].id, {
 				email: payload.email,
 				username: payload.name,
-				profile_photo: payload.picture,
+				profilePhoto: payload.picture,
 				provider: PROVIDER.GOOGLE,
 			});
 
@@ -187,7 +192,7 @@ export class AuthService {
 		return { ...tokens };
 	}
 
-	async githubAuthentication(authCode: string) {
+	async githubAuthentication(authCode: string): Promise<Tokens> {
 		try {
 			const accessTokenRequest = this.httpService
 				.post(
@@ -234,7 +239,7 @@ export class AuthService {
 				const updatedUser = await this.userService.update(users[0].id, {
 					email: `${gitUser.login}@git.com`,
 					username: gitUser.login,
-					profile_photo: gitUser.avatar_url,
+					profilePhoto: gitUser.avatar_url,
 					provider: PROVIDER.GITHUB,
 				});
 
@@ -268,7 +273,7 @@ export class AuthService {
 		}
 	}
 
-	async facebookLogin(payload: FacebookLoginDto) {
+	async facebookLogin(payload: FacebookLoginDto): Promise<Tokens> {
 		let tokens: Tokens;
 
 		const users = await this.userService.find(
@@ -278,7 +283,7 @@ export class AuthService {
 			const updatedUser = await this.userService.update(users[0].id, {
 				email: payload.email.split('@')[0] + '@facebook.com',
 				username: payload.username,
-				profile_photo: payload.profilePhoto,
+				profilePhoto: payload.profilePhoto,
 				provider: PROVIDER.FACEBOOK,
 			});
 
@@ -309,7 +314,7 @@ export class AuthService {
 		return { ...tokens };
 	}
 
-	async verifyAccessToken(token: string) {
+	async verifyAccessToken(token: string): Promise<UserDto> {
 		try {
 			const decoded = await this.jwtService.verifyAsync<JwtPayload>(token, {
 				secret: this.cfgService.get<IAuthenticationConfig>('auth').secretJwtKey,

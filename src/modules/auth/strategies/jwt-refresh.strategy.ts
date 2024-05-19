@@ -7,10 +7,11 @@ import {
 	StrategyOptionsWithoutRequest,
 } from 'passport-jwt';
 
-import { UserService } from '../../User/user.service';
+import { UserService } from '@modules/user/user.service';
+import { UserDto } from '@modules/user/dtos';
 
 import { JwtPayload } from '../types';
-import IConfig, { IAuthenticationConfig } from 'src/config';
+import { IConfig, IAuthenticationConfig } from '@configs/env';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -32,7 +33,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 		this.logger.warn('JwtRefreshStrategy initialized');
 	}
 
-	async validate(payload: JwtPayload): Promise<any> {
+	async validate(payload: JwtPayload): Promise<UserDto> {
 		this.logger.warn(`Payload: ${JSON.stringify(payload)}`);
 
 		const user = await this.userService.findOne(payload.sub);

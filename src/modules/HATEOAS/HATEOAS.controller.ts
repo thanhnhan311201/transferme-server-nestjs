@@ -1,10 +1,10 @@
 import { Get, Controller, HttpCode, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { Public } from '@modules/Common/decorators';
-import { STATUS } from '@modules/Common/types/status-code.type';
+import { Public } from '@modules/common/decorators';
+import { STATUS } from '@modules/common/types/status-code.type';
 
-import IConfig, { IGeneralConfig } from 'src/config';
+import { IConfig, IGeneralConfig } from '@configs/env';
 
 @Controller()
 export class HATEOASController {

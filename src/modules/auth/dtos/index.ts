@@ -1,6 +1,5 @@
 export * from './create_user.dto';
 export * from './signin.dto';
-export * from '../../User/dtos/user.dto';
 export * from './refresh-token.dto';
 export * from './verify-email.dto';
 export * from './google-login.dto';

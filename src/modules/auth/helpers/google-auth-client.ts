@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Credentials, OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
 
-import IConfig, { IThirdPartyConfig } from 'src/config';
+import { IConfig, IThirdPartyConfig } from '@configs/env';
 
 export class InvalidatedRefreshTokenError extends Error {}
 

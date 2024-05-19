@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Transfer } from './transfer.entity';
+import { Transfer } from '@configs/typeorm';
 import { TransferpService } from './transfer.service';
 
 @Module({

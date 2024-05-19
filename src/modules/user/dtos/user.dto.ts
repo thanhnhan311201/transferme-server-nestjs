@@ -1,7 +1,8 @@
-import { Expose, Transform } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { PROVIDER } from '../types';
+import { BaseDto } from '@modules/common/base/base.dto';
 
-export class UserDto {
+export class UserDto extends BaseDto {
 	@Expose()
 	id: string;
 
@@ -11,7 +12,6 @@ export class UserDto {
 	@Expose()
 	username: string;
 
-	@Transform(({ obj }) => obj.profile_photo)
 	@Expose()
 	profilePhoto: string;
 
