@@ -6,14 +6,24 @@ import { AuthService } from '@modules/auth/auth.service';
 import { AuthModule } from '@modules/auth/auth.module';
 
 import { handshakeAuthMiddleware } from './middlewares/socket-handshake.middleware';
+import {
+	GatewaySessionManager,
+	IGatewaySessionManager,
+} from './gateway.session';
+import { GateWayModule } from './gateway.module';
+import { IAuthService } from '@modules/auth/interfaces';
 
 export class WSIoAdapter extends IoAdapter {
 	private readonly logger = new Logger(WSIoAdapter.name);
-	private authService: AuthService;
+	private readonly authService: IAuthService;
+	private readonly gatewaySessionManager: IGatewaySessionManager;
 
-	constructor(private app: INestApplicationContext) {
+	constructor(private readonly app: INestApplicationContext) {
 		super(app);
 		this.authService = app.select(AuthModule).get(AuthService);
+		this.gatewaySessionManager = app
+			.select(GateWayModule)
+			.get(GatewaySessionManager);
 	}
 
 	createIOServer(port: number, options?: ServerOptions): any {
@@ -36,7 +46,13 @@ export class WSIoAdapter extends IoAdapter {
 
 		const server: Server = super.createIOServer(port, optionsWithCORS);
 
-		server.use(handshakeAuthMiddleware(this.authService, this.logger));
+		server.use(
+			handshakeAuthMiddleware(
+				this.authService,
+				this.logger,
+				this.gatewaySessionManager,
+			),
+		);
 
 		return server;
 	}

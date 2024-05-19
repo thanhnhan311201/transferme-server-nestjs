@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	Inject,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
@@ -9,13 +10,12 @@ import { hashSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { map, catchError, lastValueFrom } from 'rxjs';
 
-import { UserService } from '@modules/user/user.service';
 import { CreateUserDto, FacebookLoginDto, SigninDto } from './dtos';
 import { UserDto } from '@modules/user/dtos';
 
 import { ConfigService } from '@nestjs/config';
-import { RefreshTokenStorage } from './helpers/refresh-token-storage';
-import { GoogleAuthClient } from './helpers/google-auth-client';
+import { IRefreshTokenStorage } from './helpers/refresh-token-storage';
+import { IGoogleAuthClient } from './helpers/google-auth-client';
 import { genRandomString } from 'src/utils/helpers.util';
 
 import { JwtPayload, Tokens } from './types';
@@ -25,16 +25,22 @@ import {
 	IThirdPartyConfig,
 } from '@configs/env';
 import { PROVIDER } from '@modules/user/types';
+import { IAuthService } from './interfaces';
+import { IUserService } from '@modules/user/interfaces';
+import { SERVICES } from '@utils/constants.util';
 
 @Injectable({})
-export class AuthService {
+export class AuthService implements IAuthService {
 	constructor(
-		private userService: UserService,
-		private jwtService: JwtService,
-		private cfgService: ConfigService<IConfig>,
-		private refreshTokenStorage: RefreshTokenStorage,
-		private googleAuthClient: GoogleAuthClient,
-		private httpService: HttpService,
+		@Inject(SERVICES.USER_SERVICE)
+		private readonly userService: IUserService,
+		private readonly jwtService: JwtService,
+		private readonly cfgService: ConfigService<IConfig>,
+		@Inject(SERVICES.REFRESH_TOKEN_STORAGE)
+		private readonly refreshTokenStorage: IRefreshTokenStorage,
+		@Inject(SERVICES.GOOGLE_AUTH_CLIENT)
+		private readonly googleAuthClient: IGoogleAuthClient,
+		private readonly httpService: HttpService,
 	) {}
 
 	async genToken(userId: string, email: string): Promise<Tokens> {

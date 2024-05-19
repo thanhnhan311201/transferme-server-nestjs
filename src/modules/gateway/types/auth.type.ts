@@ -10,6 +10,7 @@ export type AuthPayload = {
 	};
 	clientId: string;
 	roomId: string;
+	transferRoom: string;
 };
 
-export type SocketWithAuth = Socket & AuthPayload;
+export type AuthenticatedSocket = Socket & AuthPayload;

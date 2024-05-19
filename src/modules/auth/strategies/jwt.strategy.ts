@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import {
@@ -7,18 +7,20 @@ import {
 	StrategyOptionsWithoutRequest,
 } from 'passport-jwt';
 
-import { UserService } from '@modules/user/user.service';
 import { UserDto } from '@modules/user/dtos';
 
 import { JwtPayload } from '../types';
 import { IConfig, IAuthenticationConfig } from '@configs/env';
+import { IUserService } from '@modules/user/interfaces';
+import { SERVICES } from '@utils/constants.util';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 	private readonly logger = new Logger(JwtStrategy.name);
 
 	constructor(
-		private userService: UserService,
+		@Inject(SERVICES.USER_SERVICE)
+		private userService: IUserService,
 		private cfgService: ConfigService<IConfig>,
 	) {
 		super({

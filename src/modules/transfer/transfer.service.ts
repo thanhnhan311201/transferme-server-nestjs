@@ -11,7 +11,7 @@ import { IConfig } from '@configs/env';
 export class TransferpService {
 	constructor(
 		@InjectRepository(Transfer)
-		private transferRepo: Repository<Transfer>,
-		private cfgService: ConfigService<IConfig>,
+		private readonly transferRepo: Repository<Transfer>,
+		private readonly cfgService: ConfigService<IConfig>,
 	) {}
 }

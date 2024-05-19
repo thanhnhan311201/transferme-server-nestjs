@@ -1,14 +1,17 @@
 import { ForbiddenException, Logger } from '@nestjs/common';
 
-import { AuthService } from '@modules/auth/auth.service';
-
-import { SocketWithAuth } from '../types/auth.type';
+import { AuthenticatedSocket } from '../types/auth.type';
 import { genRandomString } from '@utils/helpers.util';
-import { socketRecord } from '../utils/';
+import { IGatewaySessionManager } from '../gateway.session';
+import { IAuthService } from '@modules/auth/interfaces';
 
 export const handshakeAuthMiddleware =
-	(authService: AuthService, logger: Logger) =>
-	async (socket: SocketWithAuth, next) => {
+	(
+		authService: IAuthService,
+		logger: Logger,
+		gatewaySessionManager: IGatewaySessionManager,
+	) =>
+	async (socket: AuthenticatedSocket, next) => {
 		const token =
 			socket.handshake.auth.token || socket.handshake.headers['token'];
 		logger.debug(`Validating auth token before connection: ${token}`);
@@ -25,7 +28,7 @@ export const handshakeAuthMiddleware =
 					? user.email.split('@')[0].slice(0, 15)
 					: user.email.split('@')[0];
 			let clientId: string = `${usernameEmail}@${genRandomString(5)}`;
-			const clientIds = Array.from(socketRecord.keys());
+			const clientIds = Array.from(gatewaySessionManager.getAllSocketId());
 			while (true) {
 				if (!clientIds.includes(clientId)) {
 					break;
@@ -43,7 +46,7 @@ export const handshakeAuthMiddleware =
 			socket.clientId = clientId;
 			socket.roomId = user.id;
 
-			socketRecord.set(socket.clientId, socket.id);
+			gatewaySessionManager.setUserSocket(socket.clientId, socket);
 
 			next();
 		} catch {

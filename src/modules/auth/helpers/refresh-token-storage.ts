@@ -10,9 +10,18 @@ import { IConfig, ICacheConfig } from '@configs/env';
 
 export class InvalidatedRefreshTokenError extends Error {}
 
+export interface IRefreshTokenStorage {
+	insert(userId: string, token: string): Promise<void>;
+	validate(userId: string, token: string): Promise<boolean>;
+	invalidate(userId: string): Promise<void>;
+}
+
 @Injectable()
 export class RefreshTokenStorage
-	implements OnApplicationBootstrap, OnApplicationShutdown
+	implements
+		OnApplicationBootstrap,
+		OnApplicationShutdown,
+		IRefreshTokenStorage
 {
 	private redisClient: Redis;
 

@@ -1,5 +1,6 @@
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
+	ConnectedSocket,
 	MessageBody,
 	OnGatewayConnection,
 	OnGatewayDisconnect,
@@ -13,10 +14,11 @@ import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
 
-import { AuthService } from '@modules/auth/auth.service';
-
-import { SocketWithAuth, SOCKET_EVENTS } from './types';
-import { socketRecord } from './utils';
+import { AuthenticatedSocket } from './types';
+import { SOCKET_EVENTS } from './utils';
+import { IGatewaySessionManager } from './gateway.session';
+import { IAuthService } from '@modules/auth/interfaces';
+import { SERVICES } from '@utils/constants.util';
 
 @WebSocketGateway()
 export class TransferringGateway
@@ -27,21 +29,26 @@ export class TransferringGateway
 
 	private readonly logger = new Logger(WebSocketGateway.name);
 
-	constructor(private authService: AuthService) {}
+	constructor(
+		@Inject(SERVICES.AUTH_SERVICE)
+		private readonly authService: IAuthService,
+		@Inject(SERVICES.GATEWAY_SESSION_MANAGER)
+		private readonly gatewaySessionManager: IGatewaySessionManager,
+	) {}
 
 	// handle after init io server
-	afterInit(): any {
+	afterInit(): void {
 		this.logger.log('Websocket Gateway initialized.');
 	}
 
-	handleConnection(client: SocketWithAuth): any {
-		const sockets = this.server.of('/').sockets;
+	handleConnection(client: AuthenticatedSocket): void {
+		const ioServer = this.server.of('/');
 
 		this.logger.debug(
 			`Socket connected with userID: ${client.user.id}, and email: "${client.user.email}"`,
 		);
 		this.logger.log(`WS Client with id: ${client.id} connected!`);
-		this.logger.debug(`Number of connected sockets: ${sockets.size}`);
+		this.logger.debug(`Number of connected sockets: ${ioServer.sockets.size}`);
 
 		client.join(client.roomId);
 
@@ -53,13 +60,13 @@ export class TransferringGateway
 			clientId: string;
 		}[] = [];
 
-		const roomSockets = this.server.of('/').adapter.rooms.get(client.roomId);
+		const roomSockets = ioServer.adapter.rooms.get(client.roomId);
 		if (roomSockets) {
 			for (const socketId of roomSockets) {
 				if (socketId === client.id) {
 					continue;
 				}
-				const _client: any = sockets.get(socketId);
+				const _client: any = ioServer.sockets.get(socketId);
 				if (_client) {
 					onlineUsers.push({
 						id: _client.user.id,
@@ -94,8 +101,8 @@ export class TransferringGateway
 		});
 	}
 
-	handleDisconnect(client: SocketWithAuth): any {
-		const sockets = this.server.of('/').sockets;
+	handleDisconnect(client: AuthenticatedSocket): void {
+		const ioServer = this.server.of('/');
 
 		client.broadcast
 			.to(client.roomId)
@@ -103,7 +110,7 @@ export class TransferringGateway
 		client.leave(client.roomId);
 
 		this.logger.log(`Disconnected socket id: ${client.id}`);
-		this.logger.debug(`Number of connected sockets: ${sockets.size}`);
+		this.logger.debug(`Number of connected sockets: ${ioServer.sockets.size}`);
 	}
 
 	@SubscribeMessage('events')
@@ -121,53 +128,64 @@ export class TransferringGateway
 
 	// ----------------------------------Event listeners-------------------------------
 	@SubscribeMessage(SOCKET_EVENTS.REQUEST_SEND_FILE)
-	handleRequestTransfer(client: any, receivedClientId: string) {
-		if (!receivedClientId) {
+	handleRequestTransfer(
+		@ConnectedSocket() client: AuthenticatedSocket,
+		@MessageBody() data: { receivedClientId: string },
+	) {
+		const ioServer = this.server.of('/');
+
+		if (!data.receivedClientId) {
 			return client.emit('error', { message: 'The user not found!' });
 		}
 
-		const receivedSocketId = socketRecord.get(receivedClientId);
-		if (!receivedSocketId) {
-			return client.emit('error', { message: 'The user not found!' });
-		}
+		const receivedSocket = this.gatewaySessionManager.getUserSocket(
+			data.receivedClientId,
+		);
 
-		const receivedSocket = this.server.of('/').sockets.get(receivedSocketId);
 		if (!receivedSocket) {
 			return client.emit('error', { message: 'The device not found!' });
 		}
 
-		const transferRoom = `${client.clientId}_${receivedClientId}`;
+		const transferRoom = `${client.clientId}_${data.receivedClientId}`;
 		client.transferRoom = transferRoom;
-		(receivedSocket as any).transferRoom = transferRoom;
+		receivedSocket.transferRoom = transferRoom;
 		client.join(transferRoom);
 		receivedSocket.join(transferRoom);
 
-		this.server
-			.of('/')
-			.to(receivedSocketId)
+		ioServer
+			.to(receivedSocket.id)
 			.emit(SOCKET_EVENTS.WAIT_TRANSFER_ACCEPTED, client.user.email);
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.SEND_FILE)
 	handleSendFile(
-		client: any,
-		file: {
-			fileData: ArrayBuffer;
-			fileName: string;
-			fileType: string;
-			fileSize: number;
-			totalChunk: number;
-			countChunkId: number;
+		@ConnectedSocket() client: AuthenticatedSocket,
+		@MessageBody()
+		data: {
+			file: {
+				fileData: ArrayBuffer;
+				fileName: string;
+				fileType: string;
+				fileSize: number;
+				totalChunk: number;
+				countChunkId: number;
+			};
 		},
 	) {
 		client.broadcast
 			.to(client.transferRoom)
-			.emit(SOCKET_EVENTS.RECEIVE_FILE, file);
+			.emit(SOCKET_EVENTS.RECEIVE_FILE, data.file);
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.REPLY_TO_REQUEST)
-	handleResponse(client: any, confirm: boolean) {
-		if (confirm) {
+	handleResponse(
+		@ConnectedSocket() client: AuthenticatedSocket,
+		@MessageBody()
+		data: { confirm: boolean },
+	) {
+		const ioServer = this.server.of('/');
+
+		if (data.confirm) {
 			client.broadcast
 				.to(client.transferRoom)
 				.emit(SOCKET_EVENTS.ACCEPT_REQUEST);
@@ -175,32 +193,29 @@ export class TransferringGateway
 			client.broadcast
 				.to(client.transferRoom)
 				.emit(SOCKET_EVENTS.REFUSE_REQUEST);
-			this.server
-				.of('/')
-				.in(client.transferRoom)
-				.socketsLeave(client.transferRoom);
+			ioServer.in(client.transferRoom).socketsLeave(client.transferRoom);
 		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.ACK_RECEIVE_FILE)
 	handleAcknowledge(
-		client: any,
-		ack: { done: boolean; receivedChunk: number; totalChunk: number },
+		@ConnectedSocket() client: AuthenticatedSocket,
+		@MessageBody()
+		data: { ack: { done: boolean; receivedChunk: number; totalChunk: number } },
 	) {
+		const ioServer = this.server.of('/');
+
 		client.broadcast
 			.to(client.transferRoom)
-			.emit(SOCKET_EVENTS.ON_ACK_RECEIVE_FILE, ack);
+			.emit(SOCKET_EVENTS.ON_ACK_RECEIVE_FILE, data.ack);
 
-		if (ack.done) {
-			this.server
-				.of('/')
-				.in(client.transferRoom)
-				.socketsLeave(client.transferRoom);
+		if (data.ack.done) {
+			ioServer.in(client.transferRoom).socketsLeave(client.transferRoom);
 		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.CANCEL_TRANSFER)
-	handleCancelTransfer(client: any) {
+	handleCancelTransfer(@ConnectedSocket() client: AuthenticatedSocket) {
 		client.broadcast
 			.to(client.transferRoom)
 			.emit(SOCKET_EVENTS.ON_CANCEL_TRANSFER);

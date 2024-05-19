@@ -10,21 +10,32 @@ import { JwtStrategy, JwtRefreshStrategy } from './strategies';
 import { RefreshTokenStorage } from './helpers/refresh-token-storage';
 import { GoogleAuthClient } from './helpers/google-auth-client';
 
+import { SERVICES } from '@utils/constants.util';
+
 @Module({
-	imports: [
-		UserModule,
-		PassportModule.register({}),
-		JwtModule.register({}),
-		HttpModule,
-	],
+	imports: [UserModule, PassportModule, JwtModule, HttpModule],
 	controllers: [AuthController],
 	providers: [
-		AuthService,
+		{
+			provide: SERVICES.AUTH_SERVICE,
+			useClass: AuthService,
+		},
 		JwtStrategy,
 		JwtRefreshStrategy,
-		RefreshTokenStorage,
-		GoogleAuthClient,
+		{
+			provide: SERVICES.REFRESH_TOKEN_STORAGE,
+			useClass: RefreshTokenStorage,
+		},
+		{
+			provide: SERVICES.GOOGLE_AUTH_CLIENT,
+			useClass: GoogleAuthClient,
+		},
 	],
-	exports: [AuthService],
+	exports: [
+		{
+			provide: SERVICES.AUTH_SERVICE,
+			useClass: AuthService,
+		},
+	],
 })
 export class AuthModule {}

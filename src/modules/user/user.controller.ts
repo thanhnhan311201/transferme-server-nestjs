@@ -5,24 +5,28 @@ import {
 	Get,
 	HttpCode,
 	HttpStatus,
+	Inject,
 	Post,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { UserService } from './user.service';
-import { FriendshipService } from '@modules/friendship/friendship.service';
 import { CurrentUser } from '@modules/common/decorators';
 import { STATUS } from '@modules/common/types';
 
 import { UserDto } from './dtos';
 import { IConfig } from '@configs/env';
+import { IFriendshipService } from '@modules/friendship/interfaces';
+import { IUserService } from './interfaces';
+import { SERVICES } from '@utils/constants.util';
 
 @Controller('user')
 export class UserController {
 	constructor(
-		private userService: UserService,
-		private cfgService: ConfigService<IConfig>,
-		private friendshipService: FriendshipService,
+		@Inject(SERVICES.USER_SERVICE)
+		private readonly userService: IUserService,
+		private readonly cfgService: ConfigService<IConfig>,
+		@Inject(SERVICES.FRIENDSHIP_SERVICE)
+		private readonly friendshipService: IFriendshipService,
 	) {}
 
 	@Get('info')

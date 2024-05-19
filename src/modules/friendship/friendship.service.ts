@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,15 +6,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Friendship } from '@configs/typeorm';
 
 import { IConfig } from '@configs/env';
-import { UserService } from '@modules/user/user.service';
+import { IFriendshipService } from './interfaces';
+import { IUserService } from '@modules/user/interfaces';
+import { SERVICES } from '@utils/constants.util';
 
 @Injectable({})
-export class FriendshipService {
+export class FriendshipService implements IFriendshipService {
 	constructor(
 		@InjectRepository(Friendship)
-		private friendshipRepo: Repository<Friendship>,
-		private cfgService: ConfigService<IConfig>,
-		private userService: UserService,
+		private readonly friendshipRepo: Repository<Friendship>,
+		private readonly cfgService: ConfigService<IConfig>,
+		@Inject(SERVICES.USER_SERVICE)
+		private readonly userService: IUserService,
 	) {}
 
 	async createFriendRequest(payload: {

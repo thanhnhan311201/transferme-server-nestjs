@@ -1,13 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Credentials, OAuth2Client } from 'google-auth-library';
+import { Credentials, OAuth2Client, TokenPayload } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
 
 import { IConfig, IThirdPartyConfig } from '@configs/env';
 
 export class InvalidatedRefreshTokenError extends Error {}
 
+export interface IGoogleAuthClient {
+	verifyAuthToken(auth: string): Promise<TokenPayload>;
+}
+
 @Injectable()
-export class GoogleAuthClient {
+export class GoogleAuthClient implements IGoogleAuthClient {
 	private authClient: OAuth2Client;
 
 	constructor(private cfgService: ConfigService<IConfig>) {
@@ -20,7 +24,7 @@ export class GoogleAuthClient {
 		});
 	}
 
-	async verifyAuthToken(auth: string) {
+	async verifyAuthToken(auth: string): Promise<TokenPayload> {
 		try {
 			const r: { tokens: Credentials; res: any } =
 				await this.authClient.getToken(auth);

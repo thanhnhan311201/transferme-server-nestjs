@@ -4,11 +4,11 @@ import {
 	Get,
 	HttpCode,
 	HttpStatus,
+	Inject,
 	Post,
 	UseGuards,
 } from '@nestjs/common';
 
-import { AuthService } from '@modules/auth/auth.service';
 // import { Serialize } from '@modules/common/interceptors';
 import { CurrentUser, Public } from '@modules/common/decorators';
 import { JwtRefreshTokenGuard } from '@modules/common/guards';
@@ -23,10 +23,15 @@ import {
 	SigninDto,
 	VerifyEmailDto,
 } from './dtos';
+import { IAuthService } from './interfaces';
+import { SERVICES } from '@utils/constants.util';
 
 @Controller('auth')
 export class AuthController {
-	constructor(private authService: AuthService) {}
+	constructor(
+		@Inject(SERVICES.AUTH_SERVICE)
+		private readonly authService: IAuthService,
+	) {}
 
 	@Public()
 	@Post('signup')

@@ -15,13 +15,14 @@ import { UserDto } from './dtos/user.dto';
 import { compareSync } from 'bcryptjs';
 import { isEmpty } from 'class-validator';
 import { UserWithRelationDto } from './dtos/user-with-relation.dto';
+import { IUserService } from './interfaces';
 
 @Injectable({})
-export class UserService {
+export class UserService implements IUserService {
 	constructor(
-		@InjectRepository(User) private userRepo: Repository<User>,
-		private cfgService: ConfigService<IConfig>,
-		// private friendshipService: FriendshipService,
+		@InjectRepository(User) private readonly userRepo: Repository<User>,
+		private readonly cfgService: ConfigService<IConfig>,
+		// private readonly friendshipService: IFriendshipService,
 	) {}
 
 	async create(payload: CreateUser): Promise<UserDto> {

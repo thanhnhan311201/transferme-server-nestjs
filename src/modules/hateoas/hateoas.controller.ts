@@ -8,7 +8,7 @@ import { IConfig, IGeneralConfig } from '@configs/env';
 
 @Controller()
 export class HATEOASController {
-	constructor(private cfgService: ConfigService<IConfig>) {}
+	constructor(private readonly cfgService: ConfigService<IConfig>) {}
 
 	@Public()
 	@Get()

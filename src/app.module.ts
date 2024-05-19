@@ -8,7 +8,7 @@ import { join } from 'path';
 
 import { UserModule } from '@modules/user/user.module';
 import { AuthModule } from '@modules/auth/auth.module';
-import { EventsModule } from '@modules/gateway/gateway.module';
+import { GateWayModule } from '@modules/gateway/gateway.module';
 import { HATEOASModule } from '@modules/hateoas/hateoas.module';
 import { TransferModule } from '@modules/transfer/transfer.module';
 import { FriendshipModule } from '@modules/friendship/friendship.module';
@@ -38,7 +38,7 @@ import { entities } from '@configs/typeorm';
 		UserModule,
 		AuthModule,
 		HATEOASModule,
-		EventsModule,
+		GateWayModule,
 		TransferModule,
 		FriendshipModule,
 	],
