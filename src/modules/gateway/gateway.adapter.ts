@@ -2,16 +2,13 @@ import { ServerOptions, Server } from 'socket.io';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { INestApplicationContext, Logger } from '@nestjs/common';
 
-import { AuthService } from '@modules/auth/auth.service';
 import { AuthModule } from '@modules/auth/auth.module';
 
 import { handshakeAuthMiddleware } from './middlewares/socket-handshake.middleware';
-import {
-	GatewaySessionManager,
-	IGatewaySessionManager,
-} from './gateway.session';
+import { IGatewaySessionManager } from './gateway.session';
 import { GateWayModule } from './gateway.module';
 import { IAuthService } from '@modules/auth/interfaces';
+import { SERVICES } from '@utils/constants.util';
 
 export class WSIoAdapter extends IoAdapter {
 	private readonly logger = new Logger(WSIoAdapter.name);
@@ -20,10 +17,12 @@ export class WSIoAdapter extends IoAdapter {
 
 	constructor(private readonly app: INestApplicationContext) {
 		super(app);
-		this.authService = app.select(AuthModule).get(AuthService);
+		this.authService = app
+			.select(AuthModule)
+			.get(SERVICES.AUTH_SERVICE, { strict: false });
 		this.gatewaySessionManager = app
 			.select(GateWayModule)
-			.get(GatewaySessionManager);
+			.get(SERVICES.GATEWAY_SESSION_MANAGER, { strict: false });
 	}
 
 	createIOServer(port: number, options?: ServerOptions): any {
