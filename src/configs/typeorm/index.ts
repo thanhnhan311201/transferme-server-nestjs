@@ -1,15 +1,16 @@
 import { config as dotenvConfig } from 'dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
-import { Friendship } from './entities/friendship.entity';
+import { Friend } from './entities/friend.entity';
 import { Transfer } from './entities/transfer.entity';
 import { User } from './entities/user.entity';
+import { FriendRequest } from './entities/friend-request.entity';
 
 dotenvConfig({
 	path: process.env.NODE_ENV === 'development' ? '.env.dev' : '.env',
 });
 
-export const entities = [Friendship, Transfer, User];
+export const entities = [Friend, Transfer, User, FriendRequest];
 const ormConfig = {
 	type: 'postgres',
 	host: process.env.POSTGRES_HOST,
@@ -22,5 +23,5 @@ const ormConfig = {
 };
 const connectionSource = new DataSource(ormConfig as DataSourceOptions);
 
-export { Friendship, Transfer, User };
+export { Friend, Transfer, User, FriendRequest };
 export default connectionSource;

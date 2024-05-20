@@ -1,4 +1,3 @@
-import { Friendship } from '@configs/typeorm/entities/friendship.entity';
 import { Entity, Column, OneToMany } from 'typeorm';
 
 import { BaseEntity } from './base.entity';
@@ -22,11 +21,8 @@ export class User extends BaseEntity {
 	})
 	profilePhoto: string;
 
-	@OneToMany(() => Friendship, (friendShip) => friendShip.user)
-	friendships: Friendship[];
-
-	@OneToMany(() => Friendship, (friendship) => friendship.friend)
-	friendshipsAsFriend: Friendship[];
+	@Column({ default: false })
+	isOnline: boolean;
 
 	@OneToMany(() => Transfer, (transfer) => transfer.sender)
 	transfersSent: Transfer[];

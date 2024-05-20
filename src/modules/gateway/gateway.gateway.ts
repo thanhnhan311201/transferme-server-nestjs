@@ -15,7 +15,7 @@ import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
 
 import { AuthenticatedSocket } from './types';
-import { SOCKET_EVENTS } from './utils';
+import { SOCKET_EVENTS } from '@utils/constants.util';
 import { IGatewaySessionManager } from './gateway.session';
 import { IAuthService } from '@modules/auth/interfaces';
 import { SERVICES } from '@utils/constants.util';
@@ -33,7 +33,7 @@ export class TransferringGateway
 		@Inject(SERVICES.AUTH_SERVICE)
 		private readonly authService: IAuthService,
 		@Inject(SERVICES.GATEWAY_SESSION_MANAGER)
-		private readonly gatewaySessionManager: IGatewaySessionManager,
+		readonly sessionManager: IGatewaySessionManager,
 	) {}
 
 	// handle after init io server
@@ -138,7 +138,7 @@ export class TransferringGateway
 			return client.emit('error', { message: 'The user not found!' });
 		}
 
-		const receivedSocket = this.gatewaySessionManager.getUserSocket(
+		const receivedSocket = this.sessionManager.getUserSocket(
 			data.receivedClientId,
 		);
 

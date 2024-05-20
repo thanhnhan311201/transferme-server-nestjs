@@ -11,12 +11,15 @@ import { AuthModule } from '@modules/auth/auth.module';
 import { GateWayModule } from '@modules/gateway/gateway.module';
 import { HATEOASModule } from '@modules/hateoas/hateoas.module';
 import { TransferModule } from '@modules/transfer/transfer.module';
-import { FriendshipModule } from '@modules/friendship/friendship.module';
+import { FriendModule } from '@modules/friend/friend.module';
 
 import { JwtAuthGuard } from '@modules/common/guards';
 
 import rootConfig from '@configs/env/';
 import { entities } from '@configs/typeorm';
+import { FriendRequestModule } from '@modules/friend-request/friend-request.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EventModule } from '@modules/event/event.module';
 
 @Module({
 	imports: [
@@ -40,7 +43,10 @@ import { entities } from '@configs/typeorm';
 		HATEOASModule,
 		GateWayModule,
 		TransferModule,
-		FriendshipModule,
+		FriendModule,
+		FriendRequestModule,
+		EventEmitterModule.forRoot(),
+		EventModule,
 	],
 	controllers: [],
 	providers: [

@@ -14,7 +14,6 @@ import { IConfig, IGeneralConfig } from '@configs/env/index';
 import { UserDto } from './dtos/user.dto';
 import { compareSync } from 'bcryptjs';
 import { isEmpty } from 'class-validator';
-import { UserWithRelationDto } from './dtos/user-with-relation.dto';
 import { IUserService } from './interfaces';
 
 @Injectable({})
@@ -22,7 +21,6 @@ export class UserService implements IUserService {
 	constructor(
 		@InjectRepository(User) private readonly userRepo: Repository<User>,
 		private readonly cfgService: ConfigService<IConfig>,
-		// private readonly friendshipService: IFriendshipService,
 	) {}
 
 	async create(payload: CreateUser): Promise<UserDto> {
@@ -103,26 +101,5 @@ export class UserService implements IUserService {
 		}
 
 		return UserDto.mapToDto(user);
-	}
-
-	async getUserInfoWithRelation(userId: string): Promise<UserWithRelationDto> {
-		if (!userId) {
-			return null;
-		}
-
-		const user = await this.userRepo
-			.createQueryBuilder('user')
-			.leftJoinAndSelect('user.friendships', 'friendship')
-			.leftJoinAndSelect('user.friendshipsAsFriend', 'friendshipsAsFriend')
-			.leftJoinAndSelect('user.transfersSent', 'transfersSent')
-			.leftJoinAndSelect('user.transfersReceived', 'transfersReceived')
-			.where('user.id = :userId', { userId })
-			.getOne();
-
-		if (!user) {
-			throw new NotFoundException('User not found!');
-		}
-
-		return UserWithRelationDto.mapToDto(user);
 	}
 }

@@ -24,9 +24,9 @@ import {
 	VerifyEmailDto,
 } from './dtos';
 import { IAuthService } from './interfaces';
-import { SERVICES } from '@utils/constants.util';
+import { ROUTES, SERVICES } from '@utils/constants.util';
 
-@Controller('auth')
+@Controller(ROUTES.AUTH)
 export class AuthController {
 	constructor(
 		@Inject(SERVICES.AUTH_SERVICE)
