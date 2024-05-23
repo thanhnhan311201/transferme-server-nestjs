@@ -1,6 +1,6 @@
 import { Inject, Logger } from '@nestjs/common';
 import {
-	ConnectedSocket,
+	// ConnectedSocket,
 	MessageBody,
 	OnGatewayConnection,
 	OnGatewayDisconnect,
@@ -79,26 +79,28 @@ export class TransferringGateway
 			}
 		}
 
-		client.emit(SOCKET_EVENTS.NEW_CONNECTION, {
+		client.emit(SOCKET_EVENTS.ON_RECEIVE_NEW_CONNECTION, {
 			action: 'login',
 			userInfo: client.user,
 			onlineUsers,
 			clientId: client.clientId,
 		});
-		client.broadcast.to(client.roomId).emit(SOCKET_EVENTS.NEW_CONNECTION, {
-			action: 'new_user_login',
-			userInfo: null,
-			onlineUsers: [
-				{
-					id: client.user.id,
-					clientId: client.clientId,
-					email: client.user.email,
-					username: client.user.username,
-					profilePhoto: client.user.profilePhoto,
-				},
-			],
-			clientId: '',
-		});
+		client.broadcast
+			.to(client.roomId)
+			.emit(SOCKET_EVENTS.ON_RECEIVE_NEW_CONNECTION, {
+				action: 'new_user_login',
+				userInfo: null,
+				onlineUsers: [
+					{
+						id: client.user.id,
+						clientId: client.clientId,
+						email: client.user.email,
+						username: client.user.username,
+						profilePhoto: client.user.profilePhoto,
+					},
+				],
+				clientId: '',
+			});
 	}
 
 	handleDisconnect(client: AuthenticatedSocket): void {
@@ -106,7 +108,7 @@ export class TransferringGateway
 
 		client.broadcast
 			.to(client.roomId)
-			.emit(SOCKET_EVENTS.USER_LOGOUT, client.user.id);
+			.emit(SOCKET_EVENTS.ON_LOGGED_OUT, client.user.id);
 		client.leave(client.roomId);
 
 		this.logger.log(`Disconnected socket id: ${client.id}`);
@@ -127,97 +129,97 @@ export class TransferringGateway
 	}
 
 	// ----------------------------------Event listeners-------------------------------
-	@SubscribeMessage(SOCKET_EVENTS.REQUEST_SEND_FILE)
-	handleRequestTransfer(
-		@ConnectedSocket() client: AuthenticatedSocket,
-		@MessageBody() data: { receivedClientId: string },
-	) {
-		const ioServer = this.server.of('/');
+	// @SubscribeMessage(SOCKET_EVENTS.REQUEST_SEND_FILE)
+	// handleRequestTransfer(
+	// 	@ConnectedSocket() client: AuthenticatedSocket,
+	// 	@MessageBody() data: { receivedClientId: string },
+	// ) {
+	// 	const ioServer = this.server.of('/');
 
-		if (!data.receivedClientId) {
-			return client.emit('error', { message: 'The user not found!' });
-		}
+	// 	if (!data.receivedClientId) {
+	// 		return client.emit('error', { message: 'The user not found!' });
+	// 	}
 
-		const receivedSocket = this.sessionManager.getUserSocket(
-			data.receivedClientId,
-		);
+	// 	const receivedSocket = this.sessionManager.getUserSocket(
+	// 		data.receivedClientId,
+	// 	);
 
-		if (!receivedSocket) {
-			return client.emit('error', { message: 'The device not found!' });
-		}
+	// 	if (!receivedSocket) {
+	// 		return client.emit('error', { message: 'The device not found!' });
+	// 	}
 
-		const transferRoom = `${client.clientId}_${data.receivedClientId}`;
-		client.transferRoom = transferRoom;
-		receivedSocket.transferRoom = transferRoom;
-		client.join(transferRoom);
-		receivedSocket.join(transferRoom);
+	// 	const transferRoom = `${client.clientId}_${data.receivedClientId}`;
+	// 	client.transferRoom = transferRoom;
+	// 	receivedSocket.transferRoom = transferRoom;
+	// 	client.join(transferRoom);
+	// 	receivedSocket.join(transferRoom);
 
-		ioServer
-			.to(receivedSocket.id)
-			.emit(SOCKET_EVENTS.WAIT_TRANSFER_ACCEPTED, client.user.email);
-	}
+	// 	ioServer
+	// 		.to(receivedSocket.id)
+	// 		.emit(SOCKET_EVENTS.WAIT_TRANSFER_ACCEPTED, client.user.email);
+	// }
 
-	@SubscribeMessage(SOCKET_EVENTS.SEND_FILE)
-	handleSendFile(
-		@ConnectedSocket() client: AuthenticatedSocket,
-		@MessageBody()
-		data: {
-			file: {
-				fileData: ArrayBuffer;
-				fileName: string;
-				fileType: string;
-				fileSize: number;
-				totalChunk: number;
-				countChunkId: number;
-			};
-		},
-	) {
-		client.broadcast
-			.to(client.transferRoom)
-			.emit(SOCKET_EVENTS.RECEIVE_FILE, data.file);
-	}
+	// @SubscribeMessage(SOCKET_EVENTS.SEND_FILE)
+	// handleSendFile(
+	// 	@ConnectedSocket() client: AuthenticatedSocket,
+	// 	@MessageBody()
+	// 	data: {
+	// 		file: {
+	// 			fileData: ArrayBuffer;
+	// 			fileName: string;
+	// 			fileType: string;
+	// 			fileSize: number;
+	// 			totalChunk: number;
+	// 			countChunkId: number;
+	// 		};
+	// 	},
+	// ) {
+	// 	client.broadcast
+	// 		.to(client.transferRoom)
+	// 		.emit(SOCKET_EVENTS.RECEIVE_FILE, data.file);
+	// }
 
-	@SubscribeMessage(SOCKET_EVENTS.REPLY_TO_REQUEST)
-	handleResponse(
-		@ConnectedSocket() client: AuthenticatedSocket,
-		@MessageBody()
-		data: { confirm: boolean },
-	) {
-		const ioServer = this.server.of('/');
+	// @SubscribeMessage(SOCKET_EVENTS.REPLY_TO_REQUEST)
+	// handleResponse(
+	// 	@ConnectedSocket() client: AuthenticatedSocket,
+	// 	@MessageBody()
+	// 	data: { confirm: boolean },
+	// ) {
+	// 	const ioServer = this.server.of('/');
 
-		if (data.confirm) {
-			client.broadcast
-				.to(client.transferRoom)
-				.emit(SOCKET_EVENTS.ACCEPT_REQUEST);
-		} else {
-			client.broadcast
-				.to(client.transferRoom)
-				.emit(SOCKET_EVENTS.REFUSE_REQUEST);
-			ioServer.in(client.transferRoom).socketsLeave(client.transferRoom);
-		}
-	}
+	// 	if (data.confirm) {
+	// 		client.broadcast
+	// 			.to(client.transferRoom)
+	// 			.emit(SOCKET_EVENTS.ACCEPT_REQUEST);
+	// 	} else {
+	// 		client.broadcast
+	// 			.to(client.transferRoom)
+	// 			.emit(SOCKET_EVENTS.REFUSE_REQUEST);
+	// 		ioServer.in(client.transferRoom).socketsLeave(client.transferRoom);
+	// 	}
+	// }
 
-	@SubscribeMessage(SOCKET_EVENTS.ACK_RECEIVE_FILE)
-	handleAcknowledge(
-		@ConnectedSocket() client: AuthenticatedSocket,
-		@MessageBody()
-		data: { ack: { done: boolean; receivedChunk: number; totalChunk: number } },
-	) {
-		const ioServer = this.server.of('/');
+	// @SubscribeMessage(SOCKET_EVENTS.ACK_RECEIVE_FILE)
+	// handleAcknowledge(
+	// 	@ConnectedSocket() client: AuthenticatedSocket,
+	// 	@MessageBody()
+	// 	data: { ack: { done: boolean; receivedChunk: number; totalChunk: number } },
+	// ) {
+	// 	const ioServer = this.server.of('/');
 
-		client.broadcast
-			.to(client.transferRoom)
-			.emit(SOCKET_EVENTS.ON_ACK_RECEIVE_FILE, data.ack);
+	// 	client.broadcast
+	// 		.to(client.transferRoom)
+	// 		.emit(SOCKET_EVENTS.ON_ACK_RECEIVE_FILE, data.ack);
 
-		if (data.ack.done) {
-			ioServer.in(client.transferRoom).socketsLeave(client.transferRoom);
-		}
-	}
+	// 	if (data.ack.done) {
+	// 		ioServer.in(client.transferRoom).socketsLeave(client.transferRoom);
+	// 	}
+	// }
 
-	@SubscribeMessage(SOCKET_EVENTS.CANCEL_TRANSFER)
-	handleCancelTransfer(@ConnectedSocket() client: AuthenticatedSocket) {
-		client.broadcast
-			.to(client.transferRoom)
-			.emit(SOCKET_EVENTS.ON_CANCEL_TRANSFER);
-	}
+	// @SubscribeMessage(SOCKET_EVENTS.CANCEL_TRANSFER)
+	// handleCancelTransfer(@ConnectedSocket() client: AuthenticatedSocket) {
+	// 	client.broadcast
+	// 		.to(client.transferRoom)
+	// 		.emit(SOCKET_EVENTS.ON_CANCEL_TRANSFER);
+	// }
 }

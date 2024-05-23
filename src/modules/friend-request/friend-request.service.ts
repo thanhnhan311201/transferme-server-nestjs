@@ -41,12 +41,7 @@ export class FriendRequestService implements IFriendRequestService {
 				{ sender: { id }, status },
 				{ receiver: { id }, status },
 			],
-			relations: [
-				'receiver',
-				'sender',
-				'sender.profilePhoto',
-				'receiver.profilePhoto',
-			],
+			relations: ['receiver', 'sender'],
 		});
 	}
 
