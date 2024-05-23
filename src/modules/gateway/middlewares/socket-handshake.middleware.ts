@@ -1,9 +1,11 @@
 import { ForbiddenException, Logger } from '@nestjs/common';
 
 import { AuthenticatedSocket } from '../types/auth.type';
-import { genRandomString } from '@utils/helpers.util';
 import { IGatewaySessionManager } from '../gateway.session';
+
 import { IAuthService } from '@modules/auth/interfaces';
+
+import { genRandomString } from '@utils/helpers.util';
 
 export const handshakeAuthMiddleware =
 	(
@@ -17,7 +19,7 @@ export const handshakeAuthMiddleware =
 		logger.debug(`Validating auth token before connection: ${token}`);
 
 		if (!token) {
-			throw new ForbiddenException();
+			return next(new ForbiddenException());
 		}
 
 		try {
@@ -50,6 +52,6 @@ export const handshakeAuthMiddleware =
 
 			next();
 		} catch {
-			throw new ForbiddenException();
+			next(new ForbiddenException());
 		}
 	};
