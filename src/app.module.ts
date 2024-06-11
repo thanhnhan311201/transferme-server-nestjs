@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 import { join } from 'path';
 
@@ -12,14 +13,12 @@ import { GateWayModule } from '@modules/gateway/gateway.module';
 import { HATEOASModule } from '@modules/hateoas/hateoas.module';
 import { TransferModule } from '@modules/transfer/transfer.module';
 import { FriendModule } from '@modules/friend/friend.module';
-
+import { FriendRequestModule } from '@modules/friend-request/friend-request.module';
+import { EventModule } from '@modules/event/event.module';
 import { JwtAuthGuard } from '@modules/common/guards';
 
 import rootConfig from '@configs/env/';
 import { entities } from '@configs/typeorm';
-import { FriendRequestModule } from '@modules/friend-request/friend-request.module';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { EventModule } from '@modules/event/event.module';
 
 @Module({
 	imports: [

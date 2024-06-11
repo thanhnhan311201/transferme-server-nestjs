@@ -17,37 +17,35 @@ export enum ROUTES {
 }
 
 export enum SERVER_EVENTS {
-	FRIEND_REQUEST_CREATE = 'friendrequest.create',
-	FRIEND_REQUEST_ACCEPTED = 'friendrequest.accepted',
-	FRIEND_REQUEST_REJECTED = 'friendrequest.rejected',
-	FRIEND_REQUEST_CANCELLED = 'friendrequest.cancelled',
-	FRIEND_REQUEST_CANCEL = 'friendrequest.cancel',
-	FRIEND_REMOVED = 'friend.removed',
+	FRIEND_REQUEST_CREATE = 'friendrequest:create',
+	FRIEND_REQUEST_ACCEPTED = 'friendrequest:accepted',
+	FRIEND_REQUEST_REJECTED = 'friendrequest:rejected',
+	FRIEND_REQUEST_CANCELLED = 'friendrequest:cancelled',
+	FRIEND_REQUEST_CANCEL = 'friendrequest:cancel',
+	FRIEND_REMOVED = 'friend:removed',
 }
 
 export enum SOCKET_EVENTS {
 	// general
-	ON_RECEIVE_NEW_CONNECTION = 'onReceiveNewConnection',
-	ON_LOGGED_OUT = 'onLoggedOut',
+	NEW_CONNECTION = 'new_connection',
+	SIGNOUT = 'signout',
 
 	// Transfer
-	// SEND_FILE = 'onSendFile',
-	// WAIT_TRANSFER_ACCEPTED = 'onWaitTransferringAccepted',
-	// SUCCESS_TRANSFER = 'onTransferSuccessfully',
-	// ERROR_TRANSFER = 'onTransferFailed',
-	// CANCEL_TRANSFER = 'onCancelTransfer',
-	// ON_CANCEL_TRANSFER = 'ON_CANCEL_TRANSFER',
-	// NEW_CONNECTION = 'onNewConnection',
-	// USER_LOGGED_OUT = 'onUserLoggedOut',
-	// REQUEST_SEND_FILE = 'REQUEST_SEND_FILE',
-	// REPLY_TO_REQUEST = 'onReplyToRequest',
-	// REFUSE_REQUEST = 'onRefuseRequest',
-	// ACCEPT_REQUEST = 'onAcceptRequest',
-	// RECEIVE_FILE = 'onReceiveFile',
-	// ACK_RECEIVE_FILE = 'ACK_RECEIVE_FILE',
-	// ON_ACK_RECEIVE_FILE = 'ON_ACK_RECEIVE_FILE',
+	TRANSFER_SEND_FILE = 'transfer:send_file',
+	TRANSFER_WAIT_TRANSFER_ACCEPTED = 'transfer:wait_transfer_accepted',
+	TRANSFER_SUCCESS_TRANSFER = 'transfer:success_transfer',
+	TRANSFER_ERROR_TRANSFER = 'transfer:error_transfer',
+	TRANSFER_CANCEL_TRANSFER = 'transfer:cancel_transfer',
+	TRANSFER_ON_CANCEL_TRANSFER = 'transfer:on_cancel_transfer',
+	TRANSFER_REQUEST_SEND_FILE = 'transfer:request_send_file',
+	TRANSFER_REPLY_TO_REQUEST = 'transfer:reply_to_request',
+	TRANSFER_REFUSE_REQUEST = 'transfer:refuse_request',
+	TRANSFER_ACCEPT_REQUEST = 'transfer:accept_request',
+	TRANSFER_RECEIVE_FILE = 'transfer:receive_file',
+	TRANSFER_ACK_RECEIVE_FILE = 'transfer:ack_receive_file',
+	TRANSFER_ON_ACK_RECEIVE_FILE = 'transfer:on_ack_receive_file',
 
 	// Friend
-	FRIEND_REQUEST_ACCEPTED = 'onAcceptedFriendRequest',
-	FRIEND_REQUEST_REJECTED = 'onRejectedFriendRequest',
+	FRIEND_REQUEST_ACCEPTED = 'friend:request_accepted',
+	FRIEND_REQUEST_REJECTED = 'friend:request_rejected',
 }
